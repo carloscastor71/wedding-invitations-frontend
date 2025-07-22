@@ -4,8 +4,8 @@ export interface Family {
   id: number;
   familyName: string;
   contactPerson: string;
-  email: string;
-  phone?: string;
+  email?: string;
+  phone: string;
   maxGuests: number;
   invitationCode: string;
   invitationSent: boolean;
