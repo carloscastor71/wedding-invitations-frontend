@@ -51,16 +51,67 @@ export default function Home() {
       maxGuests: 2,
     });
   };
-const createInvitation = async () => {
-  console.log('🚀 createInvitation ejecutándose!');
-  console.log('formData:', formData);
-  console.log('invitationType:', invitationType);
-  
-  if (!formData.phone) {
-    console.log('❌ Error: Sin teléfono');
-    alert("El teléfono WhatsApp es obligatorio");
-    return;
-  }
+
+  const openWhatsApp = (family: Family) => {
+    // Mensaje personalizado para WhatsApp
+    const message = `¡Hola ${family.familyName}! 👰🤵
+
+Carlos y Karen nos casamos y queremos celebrarlo contigo!
+
+📅 *20 de Diciembre de 2025*
+🛐 Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+👔 Ceremonia Civil: 8:00 PM - Salon MONET  
+🎉 Recepción: 8:30 PM - Salon MONET
+
+Por favor confirma tu asistencia en este link:
+${window.location.origin}/invite/${family.invitationCode}
+
+Espacios disponibles para tu familia: *${family.maxGuests} personas*
+Fecha límite para confirmar: *31 de Octubre*
+
+¡Esperamos verte en nuestro gran día!
+
+Con amor,
+Carlos & Karen 💕`;
+
+    // Codificar mensaje para URL
+    const encodedMessage = encodeURIComponent(message);
+
+    // Crear link de WhatsApp al número de la familia
+    const familyPhone = family.phone.replace(/\D/g, ""); // Quitar caracteres no numéricos
+    const whatsappUrl = `https://wa.me/52${familyPhone}?text=${encodedMessage}`;
+    //                                   ↑ Tu número personal aquí
+    // Abrir WhatsApp
+    window.open(whatsappUrl, "_blank");
+
+    // Marcar como enviada después de 2 segundos
+    setTimeout(() => {
+      markAsSent(family.id);
+    }, 2000);
+  };
+
+  const markAsSent = async (familyId: number) => {
+    try {
+      // Actualizar en base de datos
+      const updatedFamily = await familiesApi.markAsSent(familyId);
+
+      // Actualizar estado local con datos de BD
+      setFamilies(families.map((f) => (f.id === familyId ? updatedFamily : f)));
+    } catch (error) {
+      console.error("Error marcando como enviada:", error);
+    }
+  };
+
+  const createInvitation = async () => {
+    console.log("🚀 createInvitation ejecutándose!");
+    console.log("formData:", formData);
+    console.log("invitationType:", invitationType);
+
+    if (!formData.phone) {
+      console.log("❌ Error: Sin teléfono");
+      alert("El teléfono WhatsApp es obligatorio");
+      return;
+    }
 
     setIsCreating(true);
     try {
@@ -207,6 +258,9 @@ const createInvitation = async () => {
                     <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
                       Código
                     </th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-800 uppercase tracking-wider">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -250,13 +304,30 @@ const createInvitation = async () => {
                               : "bg-stone-100 text-stone-800"
                           }`}
                         >
-                          {(family.status || 'draft').toUpperCase()}
+                          {(family.status || "draft").toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-mono text-gray-700 bg-stone-100 px-2 py-1 rounded">
                           {family.invitationCode}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                        {!family.invitationSent ? (
+                          <button
+                            onClick={() => openWhatsApp(family)}
+                            className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                          >
+                            📱 Enviar
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => openWhatsApp(family)}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium"
+                          >
+                            🔔 Recordatorio
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
