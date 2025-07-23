@@ -47,6 +47,18 @@ export interface InvitationData {
     requiresConfirmation: boolean;
   }[];
 }
+export interface Guest {
+  id?: number;
+  name: string;
+  isChild: boolean;
+  dietaryRestrictions?: string;
+  notes?: string;
+}
+
+export interface CompleteFormRequest {
+  guests: Guest[];
+  familyMessage?: string;
+}
 
 export const familiesApi = {
   getAll: async (): Promise<Family[]> => {
@@ -62,7 +74,7 @@ export const familiesApi = {
     });
     return response.json();
   },
-  
+
   markAsSent: async (familyId: number): Promise<Family> => {
     const response = await fetch(
       `${API_BASE_URL}/api/families/${familyId}/mark-sent`,
@@ -95,6 +107,21 @@ export const invitationApi = {
     );
     if (!response.ok) {
       throw new Error("Error al guardar respuesta");
+    }
+    return response.json();
+  },
+  completeForm: async (code: string, formData: CompleteFormRequest) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/invitation/${code}/complete-form`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      }
+    );
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al completar formulario");
     }
     return response.json();
   },

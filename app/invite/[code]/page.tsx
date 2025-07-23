@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { invitationApi, InvitationData } from '../../../lib/api';
+import { invitationApi, InvitationData, CompleteFormRequest } from '../../../lib/api';
+import GuestForm from '@/app/components/GuestForm';
 
 export default function InvitationPage() {
   const params = useParams();
@@ -12,6 +13,7 @@ export default function InvitationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [responding, setResponding] = useState(false);
+  const [showGuestForm, setShowGuestForm] = useState(false);
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -45,12 +47,34 @@ export default function InvitationPage() {
         isAttending: attending
       });
 
+      // Si acepta, mostrar formulario de invitados
+      if (attending) {
+        setShowGuestForm(true);
+      }
+
     } catch (err) {
       setError('Error al guardar tu respuesta');
       console.error(err);
     } finally {
       setResponding(false);
     }
+  };
+
+  const handleFormSubmit = async (formData: CompleteFormRequest) => {
+    await invitationApi.completeForm(code, formData);
+    
+    // Actualizar estado para mostrar confirmación final
+    setInvitation(prev => prev ? {
+      ...prev,
+      formCompleted: true,
+      confirmedGuests: formData.guests.length
+    } : null);
+    
+    setShowGuestForm(false);
+  };
+
+  const handleFormCancel = () => {
+    setShowGuestForm(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -148,7 +172,7 @@ export default function InvitationPage() {
           </div>
         </div>
 
-        {/* Confirmación de asistencia */}
+        {/* Confirmación de asistencia y formulario */}
         {!invitation.hasResponded ? (
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -178,18 +202,57 @@ export default function InvitationPage() {
               </button>
             </div>
           </div>
-        ) : (
+        ) : invitation.isAttending && !invitation.formCompleted && showGuestForm ? (
+          // Formulario de invitados
+          <GuestForm
+            maxGuests={invitation.maxGuests}
+            familyName={invitation.familyName}
+            onSubmit={handleFormSubmit}
+            onCancel={handleFormCancel}
+          />
+        ) : invitation.isAttending && !invitation.formCompleted ? (
+          // Botón para abrir formulario de invitados
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-              ¡Gracias por tu respuesta!
+              ¡Gracias por confirmar!
+            </h3>
+            <div className="text-green-600 mb-6">
+              <div className="text-6xl mb-2">🎉</div>
+              <p className="text-xl font-semibold">¡Nos vemos el 20 de diciembre!</p>
+            </div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <p className="text-yellow-800 font-medium">
+                Último paso: Por favor proporciona los nombres de las personas que asistirán
+              </p>
+              <p className="text-yellow-700 text-sm mt-1">
+                Espacios disponibles: {invitation.maxGuests} personas
+              </p>
+            </div>
+            <button
+              onClick={() => setShowGuestForm(true)}
+              className="bg-red-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-800 transition-colors"
+            >
+              📝 Completar Lista de Invitados
+            </button>
+          </div>
+        ) : (
+          // Confirmación final
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+              {invitation.isAttending ? '¡Todo Listo!' : '¡Gracias por tu respuesta!'}
             </h3>
             {invitation.isAttending ? (
               <div className="text-green-600 mb-4">
                 <div className="text-6xl mb-2">🎉</div>
                 <p className="text-xl font-semibold">¡Nos vemos el 20 de diciembre!</p>
                 <p className="text-gray-700 mt-2">
-                  Te esperamos para celebrar juntos este día tan especial.
+                  Hemos registrado {invitation.confirmedGuests} invitado{invitation.confirmedGuests !== 1 ? 's' : ''} para tu familia.
                 </p>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                  <p className="text-green-800 font-medium">
+                    ✅ Formulario completado - ¡Te esperamos!
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="text-gray-600 mb-4">
