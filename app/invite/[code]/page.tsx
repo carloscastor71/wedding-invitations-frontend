@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { invitationApi, InvitationData, CompleteFormRequest } from '../../../lib/api';
-import GuestForm from '@/app/components/GuestForm';
-import { MapPin, Calendar, Clock, Shirt, Heart } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
+import {
+  invitationApi,
+  InvitationData,
+  CompleteFormRequest,
+} from "../../../lib/api";
+import GuestForm from "@/app/components/GuestForm";
+import { MapPin, Calendar, Clock, Shirt, Heart } from "lucide-react";
 
-// Definir el tipo para los eventos
 interface WeddingEvent {
   name: string;
   time: string;
@@ -18,27 +21,28 @@ interface WeddingEvent {
 export default function InvitationPage() {
   const params = useParams();
   const code = params.code as string;
-  
+
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [responding, setResponding] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
-  
-  // Estados para las transiciones
+
+  // Estados para las transiciones elegantes
   const [showIntro, setShowIntro] = useState(true);
-  const [showNames, setShowNames] = useState(false);
+  const [introStage, setIntroStage] = useState(0);
   const [currentEvent, setCurrentEvent] = useState(0);
-  
+  const [scrollY, setScrollY] = useState(0);
+
   // Contador regresivo
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
-  const weddingDate = new Date('2025-12-20T23:30:00Z');
+  const weddingDate = new Date("2025-12-20T23:30:00Z");
 
   const events: WeddingEvent[] = [
     {
@@ -46,23 +50,54 @@ export default function InvitationPage() {
       time: "5:30 PM",
       venue: "Parroquia De San Agustín",
       address: "Paseo Viento Sur 350, 27258 Torreón",
-      icon: "⛪"
+      icon: "⛪",
     },
     {
-      name: "Ceremonia Civil", 
+      name: "Ceremonia Civil",
       time: "8:00 PM",
       venue: "Salon MONET",
       address: "Cll Lisboa 101 Granjas de San Isidro, 27100 Torreón, Coahuila",
-      icon: "💍"
+      icon: "💍",
     },
     {
       name: "Recepción",
-      time: "8:30 PM", 
+      time: "8:30 PM",
       venue: "Salon MONET",
       address: "Cll Lisboa 101 Granjas de San Isidro, 27100 Torreón, Coahuila",
-      icon: "🎉"
-    }
+      icon: "🎉",
+    },
   ];
+
+  // Optimized scroll handler with throttling
+  const handleScroll = useCallback(() => {
+    setScrollY(window.scrollY);
+  }, []);
+
+  // Optimized scroll listener
+  useEffect(() => {
+    let rafId: number;
+
+    const throttledScroll = () => {
+      rafId = requestAnimationFrame(() => {
+        handleScroll();
+      });
+    };
+
+    window.addEventListener("scroll", throttledScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", throttledScroll);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, [handleScroll]);
+
+  const openGoogleMaps = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(mapsUrl, "_blank");
+  };
 
   useEffect(() => {
     const fetchInvitation = async () => {
@@ -70,7 +105,7 @@ export default function InvitationPage() {
         const data = await invitationApi.getInvitation(code);
         setInvitation(data);
       } catch (err) {
-        setError('Error al cargar la invitación');
+        setError("Error al cargar la invitación");
         console.error(err);
       } finally {
         setLoading(false);
@@ -82,23 +117,20 @@ export default function InvitationPage() {
     }
   }, [code]);
 
-  // Transición elegante: Rosas con zoom in → Fusión de colores → Invitación
+  // Secuencia de intro elegante
   useEffect(() => {
-    const nameTimer = setTimeout(() => {
-      setShowNames(true);
-    }, 2500);
-    
-    const invitationTimer = setTimeout(() => {
-      setShowIntro(false);
-    }, 6000);
-    
+    const timer1 = setTimeout(() => setIntroStage(1), 2000);
+    const timer2 = setTimeout(() => setIntroStage(2), 4000);
+    const timer3 = setTimeout(() => setShowIntro(false), 7000);
+
     return () => {
-      clearTimeout(nameTimer);
-      clearTimeout(invitationTimer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
     };
   }, []);
 
-  // Contador regresivo
+  // Contador regresivo optimizado
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
@@ -109,7 +141,7 @@ export default function InvitationPage() {
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
+          seconds: Math.floor((difference / 1000) % 60),
         });
       }
     };
@@ -121,23 +153,20 @@ export default function InvitationPage() {
 
   const handleResponse = async (attending: boolean) => {
     if (!invitation) return;
-    
+
     setResponding(true);
     try {
       await invitationApi.respondToInvitation(code, attending);
-
       setInvitation({
         ...invitation,
         hasResponded: true,
-        isAttending: attending
+        isAttending: attending,
       });
-
       if (attending) {
         setShowGuestForm(true);
       }
-
     } catch (err) {
-      setError('Error al guardar tu respuesta');
+      setError("Error al guardar tu respuesta");
       console.error(err);
     } finally {
       setResponding(false);
@@ -146,13 +175,15 @@ export default function InvitationPage() {
 
   const handleFormSubmit = async (formData: CompleteFormRequest) => {
     await invitationApi.completeForm(code, formData);
-    
-    setInvitation(prev => prev ? {
-      ...prev,
-      formCompleted: true,
-      confirmedGuests: formData.guests.length
-    } : null);
-    
+    setInvitation((prev) =>
+      prev
+        ? {
+            ...prev,
+            formCompleted: true,
+            confirmedGuests: formData.guests.length,
+          }
+        : null
+    );
     setShowGuestForm(false);
   };
 
@@ -160,91 +191,172 @@ export default function InvitationPage() {
     setShowGuestForm(false);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-MX', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: '#fffff0'}}>
-        <div className="text-xl" style={{color: '#4c0013'}}>Cargando invitación...</div>
+      <div
+        className="min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: `url('/images/roses-intro.webp')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div
+          className="relative z-10 text-xl font-serif"
+          style={{ color: "#4c0013" }}
+        >
+          Cargando invitación...
+        </div>
       </div>
     );
   }
 
   if (error || !invitation) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: '#fffff0'}}>
-        <div className="text-center">
-          <div className="text-xl mb-4" style={{color: '#4c0013'}}>{error || 'Invitación no encontrada'}</div>
-          <p style={{color: '#586e26'}}>Verifica que el enlace sea correcto</p>
+      <div
+        className="min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: `url('/images/roses-intro.webp')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        <div className="relative z-10 text-center">
+          <div className="text-xl mb-4 font-serif" style={{ color: "#4c0013" }}>
+            {error || "Invitación no encontrada"}
+          </div>
+          <p style={{ color: "#586e26" }}>
+            Verifica que el enlace sea correcto
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen" style={{backgroundColor: '#fffff0'}}>
-      
-      {/* INTRO ELEGANTE - Zoom in de rosas → Fusión de colores */}
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Fondo independiente con efecto scroll optimizado */}
+      <div
+        className="fixed inset-0 -z-10 bg-cover bg-center will-change-transform"
+        style={{
+          backgroundImage: `url('/images/roses-intro.webp')`,
+          backgroundAttachment: "fixed",
+          transform: showIntro
+            ? `scale(1.1) translateY(20px)`
+            : `scale(${1 + scrollY * 0.0005}) translateY(${scrollY * 0.05}px)`,
+          filter: showIntro
+            ? `blur(6px)`
+            : `blur(${Math.min(scrollY * 0.01, 5)}px)`,
+          transition: showIntro
+            ? "transform 4s ease-out, filter 4s ease-out"
+            : "transform 0.1s ease-out, filter 0.1s ease-out",
+        }}
+      />
+
+      {/* ===== INTRO ELEGANTE CON SECUENCIAS ===== */}
       {showIntro && (
-        <div className="fixed inset-0 z-50">
-          {/* Imagen de rosas con zoom in */}
-          <div 
-            className={`absolute inset-0 transition-all duration-4000 ${
-              showNames ? 'opacity-30 scale-110' : 'opacity-100 scale-100'
-            }`}
-          >
-            <img 
-              src="/images/roses-intro.webp"
-              alt="Rosas de boda"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/30"></div>
-          </div>
-          
-          {/* Fusión de colores ivory + verde que aparece gradualmente */}
-          <div 
-            className={`absolute inset-0 flex items-center justify-center transition-all duration-3000 ${
-              showNames ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-            }`}
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Fondo base de imagen con zoom progresivo */}
+          <div
+            className={`absolute inset-0 transition-all duration-[4000ms] ease-out`}
             style={{
-              background: showNames 
-                ? 'linear-gradient(135deg, #fffff0 0%, #f0f5e6 30%, #586e26 70%, #4a5f22 100%)'
-                : 'transparent'
+              backgroundImage: `url('/images/roses-intro.webp')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              transform:
+                introStage >= 1
+                  ? "scale(1.1) translateY(20px)"
+                  : "scale(1) translateY(0)",
+              filter: introStage >= 1 ? "blur(6px) sepia(20%)" : "none",
+              transition: "transform 4s ease-out, filter 4s ease-out",
             }}
+          />
+
+          {/* Overlay degradado que aparece progresivamente */}
+          <div
+            className={`absolute inset-0 transition-all duration-2000 ${
+              introStage >= 1 ? "opacity-100" : "opacity-0"
+            }`}
+          />
+
+          {/* Elementos ondulados decorativos */}
+          <div
+            className={`absolute inset-0 transition-all duration-2500 ${
+              introStage >= 1 ? "opacity-40" : "opacity-0"
+            }`}
           >
-            <div className="text-center px-6" style={{color: '#4c0013'}}>
+            <div
+              className="absolute top-0 left-0 w-full h-32 opacity-30"
+              style={{
+                background: `linear-gradient(135deg, transparent 0%, #586e26 50%, transparent 100%)`,
+                clipPath: "polygon(0 0, 100% 0, 85% 100%, 15% 100%)",
+              }}
+            />
+            <div
+              className="absolute bottom-0 right-0 w-full h-32 opacity-30"
+              style={{
+                background: `linear-gradient(225deg, transparent 0%, #4c0013 50%, transparent 100%)`,
+                clipPath: "polygon(15% 0, 85% 0, 100% 100%, 0 100%)",
+              }}
+            />
+          </div>
+
+          {/* Contenido de nombres */}
+          <div
+            className={`absolute inset-0 flex items-center justify-center transition-all duration-2000 ${
+              introStage >= 2 ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            }`}
+          >
+            <div className="text-center px-6">
               <div className="flex justify-center gap-3 mb-8">
-                <Heart className="w-6 h-6 animate-pulse" fill="currentColor" />
-                <Heart className="w-8 h-8 animate-pulse delay-300" fill="currentColor" />
-                <Heart className="w-6 h-6 animate-pulse delay-500" fill="currentColor" />
+                <Heart
+                  className="w-5 h-5 animate-pulse"
+                  fill="#4c0013"
+                  style={{ color: "#4c0013" }}
+                />
+                <Heart
+                  className="w-7 h-7 animate-pulse delay-300"
+                  fill="#4c0013"
+                  style={{ color: "#4c0013" }}
+                />
+                <Heart
+                  className="w-5 h-5 animate-pulse delay-500"
+                  fill="#4c0013"
+                  style={{ color: "#4c0013" }}
+                />
               </div>
 
-              <h1 className="text-6xl md:text-8xl font-serif mb-6 tracking-wide leading-tight">
-                Carlos
-                <span style={{color: '#586e26'}}> & </span>
+              <h1
+                className="text-5xl md:text-7xl font-serif mb-6 tracking-wide leading-tight"
+                style={{ color: "#4c0013" }}
+              >
                 Karen
+                <span className="mx-3" style={{ color: "#586e26" }}>
+                  &
+                </span>
+                Carlos
               </h1>
-              
-              <div className="w-24 h-0.5 mx-auto mb-8" style={{backgroundColor: '#4c0013'}}></div>
-              
-              <h2 className="text-2xl md:text-3xl font-light mb-8 tracking-widest">
+
+              <div
+                className="w-24 h-0.5 mx-auto mb-8"
+                style={{ backgroundColor: "#4c0013" }}
+              ></div>
+
+              <h2
+                className="text-2xl md:text-3xl font-light mb-8 tracking-widest"
+                style={{ color: "#4c0013" }}
+              >
                 NOS CASAMOS
               </h2>
-              
-              {/* Fecha con fondo para contraste */}
-              <div 
-                className="backdrop-blur-sm rounded-lg px-6 py-4 border-2 shadow-lg"
+
+              <div
+                className="inline-block px-8 py-4 rounded-xl border-2 shadow-2xl backdrop-blur-sm"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 240, 0.9)',
-                  borderColor: '#4c0013',
-                  color: '#4c0013'
+                  background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                  borderColor: "#586e26",
+                  color: "#4c0013",
                 }}
               >
                 <p className="text-xl md:text-2xl font-semibold">
@@ -253,51 +365,82 @@ export default function InvitationPage() {
               </div>
             </div>
           </div>
-          
-          {/* Click para saltar */}
-          <button 
+
+          <button
             onClick={() => setShowIntro(false)}
-            className="absolute inset-0 w-full h-full cursor-pointer z-10"
+            className="absolute inset-0 w-full h-full cursor-pointer z-10 bg-transparent"
             aria-label="Continuar a la invitación"
           />
         </div>
       )}
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className={`min-h-screen transition-all duration-1000 ${
-        showIntro ? 'opacity-0' : 'opacity-100'
-      }`}>
-        
-        {/* HERO SECTION - Nombres con gradiente ivory-verde */}
-        <section className="min-h-screen flex flex-col justify-center items-center relative px-6" 
-                 style={{background: `linear-gradient(135deg, #fffff0 0%, #f0f5e6 30%, #586e26 70%, #4a5f22 100%)`}}>
-          
-          <div className="relative z-10 text-center" style={{color: '#4c0013'}}>
+      {/* ===== CONTENIDO PRINCIPAL ===== */}
+      <div
+        className={`transition-all duration-1000 ${
+          showIntro ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        {/* SECCIÓN 1: HERO - Nombres con overlay elegante */}
+        <section className="min-h-screen flex flex-col justify-center items-center relative px-6">
+          {/* Elementos decorativos ondulados */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 -right-20 w-96 h-96 opacity-10 rounded-full" />
+            <div className="absolute bottom-20 -left-20 w-80 h-80 opacity-10 rounded-full" />
+          </div>
+
+          <div className="relative z-10 text-center">
             <div className="flex justify-center gap-3 mb-8">
-              <Heart className="w-6 h-6 animate-pulse" fill="currentColor" />
-              <Heart className="w-8 h-8 animate-pulse delay-300" fill="currentColor" />
-              <Heart className="w-6 h-6 animate-pulse delay-500" fill="currentColor" />
+              <Heart
+                className="w-6 h-6 animate-pulse"
+                fill="#4c0013"
+                style={{ color: "#4c0013" }}
+              />
+              <Heart
+                className="w-8 h-8 animate-pulse delay-300"
+                fill="#4c0013"
+                style={{ color: "#4c0013" }}
+              />
+              <Heart
+                className="w-6 h-6 animate-pulse delay-500"
+                fill="#4c0013"
+                style={{ color: "#4c0013" }}
+              />
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide leading-tight">
-              Carlos
-              <span style={{color: '#586e26'}}> & </span>
+            <h1
+              className="text-5xl md:text-7xl font-serif mb-6 tracking-wide leading-tight"
+              style={{
+                color: "#4c0013",
+                textShadow:
+                  "2px 2px 4px rgba(0,0,0,0.3), 0 0 8px rgba(255,255,255,0.8)",
+              }}
+            >
               Karen
+              <span className="mx-3" style={{ color: "#586e26" }}>
+                {" "}
+                &{" "}
+              </span>
+              Carlos
             </h1>
-            
-            <div className="w-24 h-0.5 mx-auto mb-8" style={{backgroundColor: '#4c0013'}}></div>
-            
-            <h2 className="text-xl md:text-2xl font-light mb-8 tracking-widest opacity-90">
+
+            <div
+              className="w-24 h-0.5 mx-auto mb-8"
+              style={{ backgroundColor: "#4c0013" }}
+            ></div>
+
+            <h2
+              className="text-xl md:text-2xl font-light mb-8 tracking-widest opacity-90"
+              style={{ color: "#4c0013" }}
+            >
               NOS CASAMOS
             </h2>
-            
-            {/* Fecha con fondo ivory para contraste */}
-            <div 
-              className="backdrop-blur-sm rounded-lg px-6 py-4 border-2 shadow-lg"
+
+            <div
+              className="inline-block px-8 py-4 rounded-xl border-2 shadow-lg backdrop-blur-sm"
               style={{
-                backgroundColor: 'rgba(255, 255, 240, 0.95)',
-                borderColor: '#4c0013',
-                color: '#4c0013'
+                background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                borderColor: "#586e26",
+                color: "#4c0013",
               }}
             >
               <p className="text-lg md:text-xl font-semibold">
@@ -307,240 +450,351 @@ export default function InvitationPage() {
           </div>
         </section>
 
-        {/* SALUDO PERSONAL - Base ivory con vino fluyendo */}
-        <section className="py-16 px-6 relative" 
-                 style={{
-                   background: `linear-gradient(135deg, #586e26 0%, rgba(88, 110, 38, 0.8) 15%, rgba(240, 245, 230, 0.9) 35%, #fffff0 50%, #fffff0 100%)`,
-                   backgroundBlendMode: 'soft-light'
-                 }}>
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="text-3xl font-serif mb-6" style={{color: '#4c0013'}}>
+        {/* SECCIÓN 2: SALUDO PERSONAL */}
+        <section className="py-20 px-6 relative">
+          <div className="max-w-2xl mx-auto text-center relative z-10">
+            <h3
+              className="text-3xl font-serif mb-6"
+              style={{
+                color: "#fffff0",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
               ¡Hola {invitation.familyName}! 👋
             </h3>
-            <p className="text-lg leading-relaxed mb-6" style={{color: '#4c0013'}}>
-              Querido/a <strong>{invitation.contactPerson}</strong>, es un honor para nosotros 
-              invitarte a celebrar uno de los días más importantes de nuestras vidas. 
-              Tu presencia hará que este momento sea aún más especial.
-            </p>
-            <div className="w-16 h-0.5 mx-auto" style={{backgroundColor: '#4c0013'}}></div>
+            <div
+              className="inline-block px-8 py-4 rounded-xl border-2 shadow-lg backdrop-blur-sm"
+              style={{
+                background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                borderColor: "#586e26",
+                color: "#4c0013",
+              }}
+            >
+              <p className="text-lg leading-relaxed">
+                Querido/a <strong>{invitation.contactPerson}</strong>, es un
+                honor para nosotros invitarte a celebrar uno de los días más
+                importantes de nuestras vidas. Tu presencia hará que este
+                momento sea aún más especial.
+              </p>
+            </div>
+            <div
+              className="w-16 h-0.5 mx-auto"
+              style={{ backgroundColor: "#fffff0" }}
+            ></div>
           </div>
         </section>
 
-        {/* ITINERARIO - Ivory base con vino deslizándose suavemente */}
-        <section className="py-16 relative" 
-                 style={{
-                   background: `linear-gradient(135deg, #fffff0 0%, #fffff0 30%, rgba(76, 0, 19, 0.1) 45%, rgba(76, 0, 19, 0.7) 70%, #4c0013 85%, #4c0013 100%)`,
-                   backgroundBlendMode: 'multiply'
-                 }}>
-          <div className="max-w-6xl mx-auto px-6">
-            <h3 className="text-3xl font-serif text-center mb-12" 
-                style={{
-                  color: '#fffff0',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-                }}>
+        {/* SECCIÓN 3: ITINERARIO CON CARRUSEL */}
+        <section className="py-20 relative">
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
+            <h3
+              className="text-3xl font-serif text-center mb-12"
+              style={{
+                color: "#fffff0",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
               Programa del Día
             </h3>
-            
-            {/* Mobile Carousel */}
+
+            {/* Carrusel móvil */}
             <div className="md:hidden">
-              <div className="relative overflow-hidden">
-                <div 
+              <div className="relative overflow-hidden rounded-xl">
+                <div
                   className="flex transition-transform duration-300 ease-in-out"
                   style={{ transform: `translateX(-${currentEvent * 100}%)` }}
                 >
                   {events.map((event, index) => (
                     <div key={index} className="w-full flex-shrink-0 px-4">
-                      <EventCard event={event} />
+                      <EventCard event={event} onOpenMaps={openGoogleMaps} />
                     </div>
                   ))}
                 </div>
               </div>
-              
-              {/* Carousel dots */}
+
+              {/* Indicadores del carrusel */}
               <div className="flex justify-center gap-2 mt-6">
                 {events.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentEvent(index)}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      currentEvent === index ? 'opacity-100' : 'opacity-40'
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      currentEvent === index ? "scale-125" : "scale-100"
                     }`}
-                    style={{backgroundColor: '#4c0013'}}
+                    style={{
+                      backgroundColor:
+                        currentEvent === index
+                          ? "#fffff0"
+                          : "rgba(255,255,240,0.4)",
+                    }}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Desktop Grid */}
+            {/* Grid para desktop */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
               {events.map((event, index) => (
-                <EventCard key={index} event={event} />
+                <EventCard
+                  key={index}
+                  event={event}
+                  onOpenMaps={openGoogleMaps}
+                />
               ))}
             </div>
           </div>
         </section>
 
-        {/* CÓDIGO DE VESTIMENTA - Continuación del flujo vino a ivory */}
-        <section className="py-16 px-6 relative" 
-                 style={{
-                   background: `linear-gradient(135deg, #4c0013 0%, rgba(76, 0, 19, 0.8) 15%, rgba(248, 244, 240, 0.9) 35%, #fffff0 50%, #fffff0 100%)`,
-                   backgroundBlendMode: 'soft-light'
-                 }}>
-          <div className="max-w-2xl mx-auto text-center">
+        {/* SECCIÓN 4: CÓDIGO DE VESTIMENTA */}
+        <section className="py-20 px-6 relative">
+          <div className="max-w-2xl mx-auto text-center relative z-10">
             <div className="flex justify-center mb-6">
-              <div className="p-4 rounded-full" style={{backgroundColor: '#586e26'}}>
+              <div
+                className="p-4 rounded-full shadow-lg"
+                style={{ backgroundColor: "#586e26" }}
+              >
                 <Shirt className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h3 className="text-2xl font-serif mb-4" style={{color: '#4c0013'}}>
+            <h3
+              className="text-3xl font-serif mb-6"
+              style={{ color: "#4c0013" }}
+            >
               Código de Vestimenta
             </h3>
-            <div className="bg-white rounded-lg shadow-lg p-6 border-l-4" style={{borderColor: '#586e26'}}>
-              <p className="text-xl font-semibold mb-2" style={{color: '#4c0013'}}>
+            <div
+              className="backdrop-blur-sm rounded-xl shadow-lg p-6 border-l-4"
+              style={{
+                background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                borderColor: "#586e26",
+                color: "#4c0013",
+              }}
+            >
+              <p
+                className="text-2xl font-semibold mb-2"
+                style={{ color: "#4c0013" }}
+              >
                 FORMAL
               </p>
-              <p style={{color: '#586e26'}}>
+              <p className="text-lg" style={{ color: "#586e26" }}>
                 Te sugerimos vestir elegante para esta ocasión especial
               </p>
             </div>
           </div>
         </section>
 
-        {/* CONTADOR REGRESIVO - Verde deslizando suavemente */}
-        <section className="py-16 relative" 
-                 style={{
-                   background: `linear-gradient(135deg, #fffff0 0%, #fffff0 30%, rgba(88, 110, 38, 0.2) 45%, rgba(88, 110, 38, 0.8) 70%, #586e26 85%, #586e26 100%)`,
-                   backgroundBlendMode: 'multiply'
-                 }}>
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h3 className="text-3xl font-serif mb-8" 
-                style={{
-                  color: '#fffff0',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-                }}>
+        {/* SECCIÓN 5: CONTADOR REGRESIVO */}
+        <section className="py-20 relative">
+          <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <h3
+              className="text-3xl font-serif mb-8"
+              style={{
+                color: "#fffff0",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
               Faltan solo...
             </h3>
-            
+
             <div className="grid grid-cols-4 gap-4 mb-8">
               {[
-                { value: timeLeft.days, label: 'Días' },
-                { value: timeLeft.hours, label: 'Horas' },
-                { value: timeLeft.minutes, label: 'Min' },
-                { value: timeLeft.seconds, label: 'Seg' }
+                { value: timeLeft.days, label: "Días" },
+                { value: timeLeft.hours, label: "Horas" },
+                { value: timeLeft.minutes, label: "Min" },
+                { value: timeLeft.seconds, label: "Seg" },
               ].map((item, index) => (
-                <div key={index} className="bg-white rounded-lg p-4 shadow-lg">
-                  <div className="text-2xl md:text-3xl font-bold" style={{color: '#4c0013'}}>
-                    {item.value.toString().padStart(2, '0')}
+                <div
+                  key={index}
+                  className="backdrop-blur-sm rounded-xl p-4 shadow-lg border-2"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                    borderColor: "#4c0013",
+                  }}
+                >
+                  <div
+                    className="text-2xl md:text-3xl font-bold"
+                    style={{ color: "#4c0013" }}
+                  >
+                    {item.value.toString().padStart(2, "0")}
                   </div>
-                  <div className="text-sm" style={{color: '#586e26'}}>{item.label}</div>
+                  <div
+                    className="text-sm font-medium"
+                    style={{ color: "#586e26" }}
+                  >
+                    {item.label}
+                  </div>
                 </div>
               ))}
             </div>
-            
-            <p className="text-lg opacity-90" 
-               style={{
-                 color: '#fffff0',
-                 textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-               }}>
+
+            <p
+              className="text-xl md:text-2xl opacity-90"
+              style={{
+                color: "#fffff0",
+                textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
+              }}
+            >
               ¡No te lo pierdas!
             </p>
           </div>
         </section>
-
-        {/* CONFIRMACIÓN DE ASISTENCIA - Cierre con vino fluyendo */}
+        {/* SECCIÓN 6: CONFIRMACIÓN DE ASISTENCIA */}
         {!invitation.hasResponded ? (
-          <section className="py-16 px-6 relative" 
-                   style={{
-                     background: `linear-gradient(135deg, #586e26 0%, rgba(88, 110, 38, 0.7) 15%, rgba(255, 255, 240, 0.9) 35%, #fffff0 50%, rgba(76, 0, 19, 0.1) 70%, rgba(76, 0, 19, 0.8) 90%, #4c0013 100%)`,
-                     backgroundBlendMode: 'soft-light'
-                   }}>
-            <div className="max-w-2xl mx-auto text-center">
-              <h3 className="text-3xl font-serif mb-6" style={{color: '#4c0013'}}>
+          <section className="py-20 px-6 relative">
+            <div className="max-w-2xl mx-auto text-center relative z-10">
+              <h3
+                className="text-3xl font-serif mb-6"
+                style={{ color: "#4c0013" }}
+              >
                 Confirma tu Asistencia
               </h3>
-              <p className="text-lg mb-8" style={{color: '#4c0013'}}>
-                Por favor confirma si podrás acompañarnos en la <strong>recepción</strong>
+              <p className="text-lg mb-6" style={{ color: "#4c0013" }}>
+                Por favor confirma si podrás acompañarnos en la{" "}
+                <strong>recepción</strong>
               </p>
-              <p className="text-sm mb-8" style={{color: '#4c0013', opacity: 0.8}}>
+              <p
+                className="text-sm mb-8 opacity-80"
+                style={{ color: "#4c0013" }}
+              >
                 Fecha límite: 31 de Octubre 2025
               </p>
-              
-              <div className="flex gap-4 justify-center">
-                <button 
+
+              <div className="flex gap-4 justify-center flex-wrap">
+                <button
                   onClick={() => handleResponse(true)}
                   disabled={responding}
-                  className="px-8 py-3 rounded-lg font-semibold transition-colors hover:opacity-90 disabled:opacity-50 shadow-lg"
-                  style={{backgroundColor: '#586e26', color: '#fffff0'}}
+                  className="px-8 py-4 rounded-xl font-semibold transition-all hover:opacity-90 hover:scale-105 disabled:opacity-50 shadow-lg border-2"
+                  style={{
+                    backgroundColor: "#586e26",
+                    color: "#fffff0",
+                    borderColor: "#586e26",
+                  }}
                 >
-                  {responding ? 'Guardando...' : '✅ Sí, asistiré'}
+                  {responding ? "Guardando..." : "✅ Sí, asistiré"}
                 </button>
-                <button 
+                <button
                   onClick={() => handleResponse(false)}
                   disabled={responding}
-                  className="px-8 py-3 rounded-lg font-semibold transition-colors hover:opacity-90 disabled:opacity-50 shadow-lg"
-                  style={{backgroundColor: '#4c0013', color: '#fffff0'}}
+                  className="px-8 py-4 rounded-xl font-semibold transition-all hover:opacity-90 hover:scale-105 disabled:opacity-50 shadow-lg border-2"
+                  style={{
+                    backgroundColor: "#4c0013",
+                    color: "#fffff0",
+                    borderColor: "#4c0013",
+                  }}
                 >
-                  {responding ? 'Guardando...' : '❌ No podré asistir'}
+                  {responding ? "Guardando..." : "❌ No podré asistir"}
                 </button>
               </div>
             </div>
           </section>
-        ) : invitation.isAttending && !invitation.formCompleted && showGuestForm ? (
-          <GuestForm
-            maxGuests={invitation.maxGuests}
-            familyName={invitation.familyName}
-            onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
-          />
+        ) : invitation.isAttending &&
+          !invitation.formCompleted &&
+          showGuestForm ? (
+          <div className="relative">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `rgba(255,255,240,0.95)`,
+              }}
+            />
+            <div className="relative z-10">
+              <GuestForm
+                maxGuests={invitation.maxGuests}
+                familyName={invitation.familyName}
+                onSubmit={handleFormSubmit}
+                onCancel={handleFormCancel}
+              />
+            </div>
+          </div>
         ) : invitation.isAttending && !invitation.formCompleted ? (
-          <section className="py-16 px-6" style={{backgroundColor: '#fffff0'}}>
-            <div className="max-w-2xl mx-auto text-center">
-              <h3 className="text-2xl font-semibold mb-4" style={{color: '#4c0013'}}>
+          <section className="py-20 px-6 relative">
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `rgba(255,255,240,0.95)`,
+              }}
+            />
+            <div className="max-w-2xl mx-auto text-center relative z-10">
+              <h3
+                className="text-3xl font-serif mb-6"
+                style={{ color: "#4c0013" }}
+              >
                 ¡Gracias por confirmar!
               </h3>
-              <div className="mb-6" style={{color: '#586e26'}}>
-                <div className="text-6xl mb-2">🎉</div>
-                <p className="text-xl font-semibold">¡Nos vemos el 20 de diciembre!</p>
+              <div className="mb-8">
+                <div className="text-6xl mb-4">🎉</div>
+                <p
+                  className="text-xl font-semibold mb-4"
+                  style={{ color: "#586e26" }}
+                >
+                  ¡Nos vemos el 20 de diciembre!
+                </p>
               </div>
-              <div className="bg-yellow-50 border-2 rounded-lg p-4 mb-6" style={{borderColor: '#586e26'}}>
-                <p className="font-medium" style={{color: '#586e26'}}>
-                  Último paso: Por favor proporciona los nombres de las personas que asistirán
+              <div
+                className="bg-yellow-50 border-2 rounded-xl p-6 mb-8"
+                style={{ borderColor: "#586e26" }}
+              >
+                <p className="font-medium text-lg" style={{ color: "#586e26" }}>
+                  Último paso: Por favor proporciona los nombres de las personas
+                  que asistirán
                 </p>
               </div>
               <button
                 onClick={() => setShowGuestForm(true)}
-                className="px-8 py-3 rounded-lg font-semibold text-white transition-colors hover:opacity-90"
-                style={{backgroundColor: '#4c0013'}}
+                className="px-8 py-4 rounded-xl font-semibold text-white transition-all hover:opacity-90 hover:scale-105 shadow-lg"
+                style={{ backgroundColor: "#4c0013" }}
               >
                 📝 Completar Lista de Invitados
               </button>
             </div>
           </section>
         ) : (
-          <section className="py-16 px-6" style={{backgroundColor: '#fffff0'}}>
-            <div className="max-w-2xl mx-auto text-center">
-              <h3 className="text-2xl font-semibold mb-4" style={{color: '#4c0013'}}>
-                {invitation.isAttending ? '¡Todo Listo!' : '¡Gracias por tu respuesta!'}
+          <section className="py-20 px-6 relative">
+            <div className="absolute inset-0" style={{}} />
+            <div className="max-w-2xl mx-auto text-center relative z-10">
+              <h3
+                className="text-3xl font-serif mb-6"
+                style={{ color: "#4c0013" }}
+              >
+                {invitation.isAttending
+                  ? "¡Todo Listo!"
+                  : "¡Gracias por tu respuesta!"}
               </h3>
               {invitation.isAttending ? (
-                <div className="mb-4" style={{color: '#586e26'}}>
-                  <div className="text-6xl mb-2">🎉</div>
-                  <p className="text-xl font-semibold">¡Nos vemos el 20 de diciembre!</p>
-                  <p className="mt-2" style={{color: '#586e26'}}>
-                    Hemos registrado {invitation.confirmedGuests} invitado{invitation.confirmedGuests !== 1 ? 's' : ''} para tu familia.
+                <div className="mb-6">
+                  <div className="text-6xl mb-4">🎉</div>
+                  <p
+                    className="text-xl font-semibold mb-4"
+                    style={{ color: "#586e26" }}
+                  >
+                    ¡Nos vemos el 20 de diciembre!
                   </p>
-                  <div className="bg-green-50 border-2 rounded-lg p-4 mt-4" style={{borderColor: '#586e26'}}>
-                    <p className="font-medium" style={{color: '#586e26'}}>
+                  <p className="mb-4" style={{ color: "#586e26" }}>
+                    Hemos registrado {invitation.confirmedGuests} invitado
+                    {invitation.confirmedGuests !== 1 ? "s" : ""} para tu
+                    familia.
+                  </p>
+                  <div
+                    className="bg-green-50 border-2 rounded-xl p-4"
+                    style={{ borderColor: "#586e26" }}
+                  >
+                    <p className="font-medium" style={{ color: "#586e26" }}>
                       ✅ Formulario completado - ¡Te esperamos!
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="mb-4" style={{color: '#586e26'}}>
-                  <div className="text-6xl mb-2">😢</div>
-                  <p className="text-xl font-semibold">Lamentamos que no puedas acompañarnos</p>
-                  <p className="mt-2">
-                    Te agradecemos por avisarnos. ¡Esperamos celebrar contigo en otra ocasión!
+                <div className="mb-6">
+                  <div className="text-6xl mb-4">😢</div>
+                  <p
+                    className="text-xl font-semibold mb-4"
+                    style={{ color: "#586e26" }}
+                  >
+                    Lamentamos que no puedas acompañarnos
+                  </p>
+                  <p style={{ color: "#586e26" }}>
+                    Te agradecemos por avisarnos. ¡Esperamos celebrar contigo en
+                    otra ocasión!
                   </p>
                 </div>
               )}
@@ -549,47 +803,72 @@ export default function InvitationPage() {
         )}
 
         {/* FOOTER */}
-        <footer className="py-12 text-center" style={{backgroundColor: '#4c0013'}}>
-          <p className="text-white opacity-90">Con amor,</p>
-          <p className="text-xl font-serif text-white mt-2">Carlos & Karen 💕</p>
+        <footer className="py-12 relative">
+          <div className="max-w-md mx-auto text-center relative z-10">
+            <p className="opacity-90 mb-2" style={{ color: "#586e26" }}>
+              Con amor,
+            </p>
+            <p className="text-2xl font-serif" style={{ color: "#586e26" }}>
+              Carlos & Karen 💕
+            </p>
+          </div>
         </footer>
-        
       </div>
     </div>
   );
 }
 
-// Componente EventCard elegante
-const EventCard = ({ event }: { event: WeddingEvent }) => (
-  <div className="bg-white rounded-lg shadow-lg overflow-hidden border-t-4 hover:shadow-xl transition-shadow" 
-       style={{borderColor: '#4c0013'}}>
+// Componente EventCard elegante con funcionalidad de Maps y fondo consistente
+const EventCard = ({
+  event,
+  onOpenMaps,
+}: {
+  event: WeddingEvent;
+  onOpenMaps: (address: string) => void;
+}) => (
+  <div
+    className="backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border-t-4 hover:shadow-2xl transition-all duration-300 hover:scale-105"
+    style={{
+      background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+      borderColor: "#4c0013",
+    }}
+  >
     <div className="p-6">
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-2xl">{event.icon}</span>
-        <h4 className="text-xl font-semibold" style={{color: '#4c0013'}}>
+        <span className="text-3xl">{event.icon}</span>
+        <h4
+          className="text-xl font-semibold font-serif"
+          style={{ color: "#4c0013" }}
+        >
           {event.name}
         </h4>
       </div>
-      
+
       <div className="space-y-3 mb-6">
-        <div className="flex items-center gap-2" style={{color: '#586e26'}}>
-          <Clock className="w-4 h-4" />
-          <span className="font-medium">{event.time}</span>
+        <div className="flex items-center gap-2" style={{ color: "#586e26" }}>
+          <Clock className="w-5 h-5" />
+          <span className="font-medium text-lg">{event.time}</span>
         </div>
-        <div className="flex items-start gap-2" style={{color: '#586e26'}}>
-          <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+        <div className="flex items-start gap-2" style={{ color: "#586e26" }}>
+          <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
           <div>
-            <div className="font-medium">{event.venue}</div>
-            <div className="text-sm opacity-80">{event.address}</div>
+            <div className="font-semibold text-lg">{event.venue}</div>
+            <div className="text-sm opacity-80 leading-relaxed">
+              {event.address}
+            </div>
           </div>
         </div>
       </div>
-      
-      <button 
-        className="w-full py-3 px-4 rounded-lg text-white font-medium transition-all hover:opacity-90 hover:scale-105"
-        style={{backgroundColor: '#586e26'}}
+
+      <button
+        onClick={() => onOpenMaps(event.address)}
+        className="w-full py-3 px-4 rounded-xl text-white font-semibold transition-all hover:opacity-90 hover:scale-105 shadow-lg border-2"
+        style={{
+          backgroundColor: "#586e26",
+          borderColor: "#586e26",
+        }}
       >
-        📍 Ver en Maps
+        📍 Ver en Google Maps
       </button>
     </div>
   </div>
