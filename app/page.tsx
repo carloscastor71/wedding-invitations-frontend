@@ -101,6 +101,59 @@ Carlos & Karen 💕`;
       console.error("Error marcando como enviada:", error);
     }
   };
+  const deleteFamily = async (familyId: number, familyName: string) => {
+    // Solo una confirmación simple
+    const confirmMessage = `¿Estás seguro de eliminar la familia "${familyName}"?\n\nEsto eliminará:\n- La invitación\n- Todos los invitados registrados\n- Toda la información relacionada\n\nEsta acción NO se puede deshacer.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const result = await familiesApi.delete(familyId);
+      setFamilies(families.filter((f) => f.id !== familyId));
+      alert(`✅ ${result.message}`);
+    } catch (error: any) {
+      alert(`❌ Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const downloadExcel = async () => {
+    try {
+      setLoading(true);
+      console.log("📊 Starting Excel download...");
+
+      const blob = await familiesApi.exportExcel();
+      console.log("📊 Excel blob received, size:", blob.size);
+
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Nombre del archivo con fecha
+      const fecha = new Date().toISOString().split("T")[0];
+      link.download = `Invitados_Boda_Karen_Carlos_${fecha}.xlsx`;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+
+      console.log("✅ Excel download completed");
+      alert("✅ Excel descargado exitosamente");
+    } catch (error: any) {
+      console.error("❌ Error downloading Excel:", error);
+      alert(`❌ Error al descargar Excel: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const createInvitation = async () => {
     console.log("🚀 createInvitation ejecutándose!");
@@ -122,7 +175,7 @@ Carlos & Karen 💕`;
         familyData = {
           familyName: formData.name,
           contactPerson: formData.name,
-          email: formData.email,
+          email: formData.email || undefined,
           phone: formData.phone,
           maxGuests: 1,
         };
@@ -227,12 +280,31 @@ Carlos & Karen 💕`;
             <h2 className="text-xl font-semibold text-white">
               Familias Invitadas
             </h2>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-white text-red-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              + Crear Invitación
-            </button>
+            <div className="flex gap-3">
+              {/* NUEVO: Botón Excel */}
+              <button
+                onClick={downloadExcel}
+                disabled={loading}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Descargando...
+                  </>
+                ) : (
+                  <>📊 Descargar Excel</>
+                )}
+              </button>
+
+              {/* Botón crear existente */}
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-white text-red-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                + Crear Invitación
+              </button>
+            </div>
           </div>
 
           {families.length > 0 ? (
@@ -304,7 +376,7 @@ Carlos & Karen 💕`;
                               : "bg-stone-100 text-stone-800"
                           }`}
                         >
-                          {(family.status || "draft").toUpperCase()}
+                          {String(family.status || "draft").toUpperCase()}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -312,22 +384,34 @@ Carlos & Karen 💕`;
                           {family.invitationCode}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap space-x-2">
-                        {!family.invitationSent ? (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex gap-2 items-center">
+                          {!family.invitationSent ? (
+                            <button
+                              onClick={() => openWhatsApp(family)}
+                              className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                            >
+                              📱 Enviar
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openWhatsApp(family)}
+                              className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium"
+                            >
+                              🔔 Recordatorio
+                            </button>
+                          )}
+
                           <button
-                            onClick={() => openWhatsApp(family)}
-                            className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                            onClick={() =>
+                              deleteFamily(family.id, family.familyName)
+                            }
+                            disabled={loading}
+                            className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors text-sm font-medium disabled:opacity-50"
                           >
-                            📱 Enviar
+                            🗑️ Eliminar
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => openWhatsApp(family)}
-                            className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium"
-                          >
-                            🔔 Recordatorio
-                          </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))}
