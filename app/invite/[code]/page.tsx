@@ -10,6 +10,7 @@ import {
 import GuestForm from "@/app/components/GuestForm";
 import { MapPin, Clock, Shirt, Heart } from "lucide-react";
 
+
 interface WeddingEvent {
   name: string;
   time: string;
@@ -27,7 +28,8 @@ export default function InvitationPage() {
   const [error, setError] = useState<string | null>(null);
   const [responding, setResponding] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
-
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  
   // Estados para las transiciones elegantes
   const [showIntro, setShowIntro] = useState(true);
   const [introStage, setIntroStage] = useState(0);
@@ -498,39 +500,100 @@ export default function InvitationPage() {
             </h3>
 
             {/* Carrusel móvil */}
-            <div className="md:hidden">
-              <div className="relative overflow-hidden rounded-xl">
-                <div
-                  className="flex transition-transform duration-300 ease-in-out"
-                  style={{ transform: `translateX(-${currentEvent * 100}%)` }}
-                >
-                  {events.map((event, index) => (
-                    <div key={index} className="w-full flex-shrink-0 px-4">
-                      <EventCard event={event} onOpenMaps={openGoogleMaps} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Carrusel móvil con swipe y navegación */}
+<div className="md:hidden">
+  <div className="relative">
+    {/* Botón anterior */}
+    {currentEvent > 0 && (
+      <button
+        onClick={() => setCurrentEvent(currentEvent - 1)}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
+        aria-label="Evento anterior"
+      >
+        <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+    )}
 
-              {/* Indicadores del carrusel */}
-              <div className="flex justify-center gap-2 mt-6">
-                {events.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentEvent(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      currentEvent === index ? "scale-125" : "scale-100"
-                    }`}
-                    style={{
-                      backgroundColor:
-                        currentEvent === index
-                          ? "#fffff0"
-                          : "rgba(255,255,240,0.4)",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
+    {/* Botón siguiente */}
+    {currentEvent < events.length - 1 && (
+      <button
+        onClick={() => setCurrentEvent(currentEvent + 1)}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
+        aria-label="Siguiente evento"
+      >
+        <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    )}
+
+    {/* Área de swipe */}
+    <div 
+      className="overflow-hidden rounded-xl"
+      onTouchStart={(e) => {
+        const touch = e.touches[0];
+        setTouchStart(touch.clientX);
+      }}
+      onTouchMove={(e) => {
+        if (!touchStart) return;
+        const currentTouch = e.touches[0].clientX;
+        const diff = touchStart - currentTouch;
+        
+        if (Math.abs(diff) > 50) {
+          if (diff > 0 && currentEvent < events.length - 1) {
+            setCurrentEvent(currentEvent + 1);
+          } else if (diff < 0 && currentEvent > 0) {
+            setCurrentEvent(currentEvent - 1);
+          }
+          setTouchStart(null);
+        }
+      }}
+      onTouchEnd={() => {
+        setTouchStart(null);
+      }}
+    >
+      <div
+        className="flex transition-transform duration-300 ease-in-out"
+        style={{ transform: `translateX(-${currentEvent * 100}%)` }}
+      >
+        {events.map((event, index) => (
+          <div key={index} className="w-full flex-shrink-0 px-4">
+            <EventCard event={event} onOpenMaps={openGoogleMaps} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  {/* Indicadores mejorados */}
+  <div className="flex justify-center gap-3 mt-6">
+    {events.map((_, index) => (
+      <button
+        key={index}
+        onClick={() => setCurrentEvent(index)}
+        className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 ${
+          currentEvent === index ? "scale-125" : "scale-100"
+        }`}
+        style={{
+          backgroundColor:
+            currentEvent === index
+              ? "#fffff0"
+              : "rgba(255,255,240,0.4)",
+        }}
+        aria-label={`Ver ${events[index].name}`}
+      />
+    ))}
+  </div>
+
+  {/* Instrucciones */}
+  <div className="text-center mt-3">
+    <p className="text-sm opacity-70" style={{ color: "#fffff0" }}>
+      👆 Desliza o usa las flechas para navegar
+    </p>
+  </div>
+</div>
 
             {/* Grid para desktop */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
