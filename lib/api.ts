@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://localhost:44342";
+const API_BASE_URL = "https://weddinginvitationsapi-production.up.railway.app";
+
 
 export interface Family {
   id: number;
@@ -38,7 +39,7 @@ export interface InvitationData {
   isAttending: boolean | null;
   formCompleted: boolean;
   responseDeadline: string;
-  guests: any[];
+  guests: Guest[];
   events: {
     name: string;
     dateTime: string;
@@ -86,7 +87,7 @@ export const familiesApi = {
     return response.json();
   },
 
-  delete: async (familyId: number): Promise<any> => {
+  delete: async (familyId: number): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/api/families/${familyId}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
