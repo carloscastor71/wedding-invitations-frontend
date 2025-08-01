@@ -68,8 +68,9 @@ const GuestForm: React.FC<GuestFormProps> = ({
         })),
         familyMessage: familyMessage.trim() || undefined
       });
-    } catch (error: any) {
-      alert(error.message || 'Error al guardar los datos. Por favor intenta de nuevo.');
+    } catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+  alert(errorMessage || 'Error al guardar los datos. Por favor intenta de nuevo.');
     } finally {
       setSubmitting(false);
     }

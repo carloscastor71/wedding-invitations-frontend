@@ -112,16 +112,17 @@ Carlos & Karen`;
       return;
     }
 
-    try {
-      setLoading(true);
-      const result = await familiesApi.delete(familyId);
-      setFamilies(families.filter((f) => f.id !== familyId));
-      alert(`✅ ${result.message}`);
-    } catch (error: any) {
-      alert(`❌ Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
+   try {
+  setLoading(true);
+  await familiesApi.delete(familyId);
+  setFamilies(families.filter((f) => f.id !== familyId));
+  alert(`✅ Familia eliminada exitosamente`);
+} catch (error: unknown) {
+  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+  alert(`❌ Error: ${errorMessage}`);
+} finally {
+  setLoading(false);
+}
   };
   const downloadExcel = async () => {
     try {
@@ -150,9 +151,10 @@ Carlos & Karen`;
 
       console.log("✅ Excel download completed");
       alert("✅ Excel descargado exitosamente");
-    } catch (error: any) {
-      console.error("❌ Error downloading Excel:", error);
-      alert(`❌ Error al descargar Excel: ${error.message}`);
+    } catch (error: unknown) {
+  console.error("❌ Error downloading Excel:", error);
+  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+  alert(`❌ Error al descargar Excel: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

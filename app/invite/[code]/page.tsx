@@ -8,7 +8,7 @@ import {
   CompleteFormRequest,
 } from "../../../lib/api";
 import GuestForm from "@/app/components/GuestForm";
-import { MapPin, Calendar, Clock, Shirt, Heart } from "lucide-react";
+import { MapPin, Clock, Shirt, Heart } from "lucide-react";
 
 interface WeddingEvent {
   name: string;
@@ -149,7 +149,7 @@ export default function InvitationPage() {
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
-  }, []);
+ }, [weddingDate]); 
 
   const handleResponse = async (attending: boolean) => {
     if (!invitation) return;
