@@ -54,25 +54,28 @@ export default function Home() {
 
   const openWhatsApp = (family: Family) => {
     // Mensaje personalizado para WhatsApp
-    const message = `¡Hola ${family.familyName}! 👰🤵
+const message = `¡Hola ${family.familyName}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
 
-📅 *20 de Diciembre de 2025*
-🛐 Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-👔 Ceremonia Civil: 8:00 PM - Salon MONET  
-🎉 Recepción: 8:30 PM - Salon MONET
+*20 de Diciembre de 2025*
 
-Por favor confirma tu asistencia en este link:
-${window.location.origin}/invite/${family.invitationCode}
+• Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+• Ceremonia Civil: 8:00 PM - Salon MONET  
+• Recepción: 8:30 PM - Salon MONET
 
-Espacios disponibles para tu familia: *${family.maxGuests} personas*
-Fecha límite para confirmar: *31 de Octubre*
+Por favor confirma tu asistencia:
+https://karen-carlos-wedding.vercel.app/invite/${family.invitationCode}
+
+Espacios disponibles: *${family.maxGuests} personas*
+Fecha límite: *20 de Noviembre de 2025*
+
+*Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
 ¡Esperamos verte en nuestro gran día!
 
 Con amor,
-Carlos & Karen 💕`;
+Carlos & Karen`;
 
     // Codificar mensaje para URL
     const encodedMessage = encodeURIComponent(message);

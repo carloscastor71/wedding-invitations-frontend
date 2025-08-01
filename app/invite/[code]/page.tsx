@@ -42,8 +42,8 @@ export default function InvitationPage() {
     seconds: 0,
   });
 
-  const weddingDate = new Date("2025-12-20T23:30:00Z");
-
+ const weddingDate = new Date("2025-12-20T17:30:00-06:00");
+ 
   const events: WeddingEvent[] = [
     {
       name: "Ceremonia Religiosa",
@@ -546,42 +546,66 @@ export default function InvitationPage() {
         </section>
 
         {/* SECCIÓN 4: CÓDIGO DE VESTIMENTA */}
-        <section className="py-20 px-6 relative">
-          <div className="max-w-2xl mx-auto text-center relative z-10">
-            <div className="flex justify-center mb-6">
-              <div
-                className="p-4 rounded-full shadow-lg"
-                style={{ backgroundColor: "#586e26" }}
-              >
-                <Shirt className="w-8 h-8 text-white" />
-              </div>
-            </div>
-            <h3
-              className="text-3xl font-serif mb-6"
-              style={{ color: "#4c0013" }}
-            >
-              Código de Vestimenta
-            </h3>
-            <div
-              className="backdrop-blur-sm rounded-xl shadow-lg p-6 border-l-4"
-              style={{
-                background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
-                borderColor: "#586e26",
-                color: "#4c0013",
-              }}
-            >
-              <p
-                className="text-2xl font-semibold mb-2"
-                style={{ color: "#4c0013" }}
-              >
-                FORMAL
-              </p>
-              <p className="text-lg" style={{ color: "#586e26" }}>
-                Te sugerimos vestir elegante para esta ocasión especial
-              </p>
-            </div>
-          </div>
-        </section>
+<section className="py-20 px-6 relative">
+  <div className="max-w-2xl mx-auto text-center relative z-10">
+    <div className="flex justify-center mb-6">
+      <div
+        className="p-4 rounded-full shadow-lg"
+        style={{ backgroundColor: "#586e26" }}
+      >
+        <Shirt className="w-8 h-8 text-white" />
+      </div>
+    </div>
+    <h3
+      className="text-3xl font-serif mb-6"
+      style={{ color: "#4c0013" }}
+    >
+      Código de Vestimenta
+    </h3>
+    
+    <div
+      className="backdrop-blur-sm rounded-xl shadow-lg p-6 border-l-4"
+      style={{
+        background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+        borderColor: "#586e26",
+        color: "#4c0013",
+      }}
+    >
+      <p
+        className="text-2xl font-semibold mb-2"
+        style={{ color: "#4c0013" }}
+      >
+        FORMAL
+      </p>
+      <p className="text-lg mb-6" style={{ color: "#586e26" }}>
+        Te sugerimos vestir elegante para esta ocasión especial
+      </p>
+      
+      {/* Separador sutil */}
+      <div className="w-16 h-px mx-auto mb-6" style={{ backgroundColor: "#4c0013", opacity: 0.3 }}></div>
+      
+      <div className="text-left">
+        <p className="font-medium mb-3 text-center" style={{ color: "#4c0013" }}>
+          Por favor evita estos colores:
+        </p>
+        <div className="space-y-2 text-sm">
+          <p style={{ color: "#586e26" }}>
+            <span className="font-medium" style={{ color: "#4c0013" }}>• Blanco o marfil</span> - reservado para la novia
+          </p>
+          <p style={{ color: "#586e26" }}>
+            <span className="font-medium" style={{ color: "#4c0013" }}>• Negro total</span> - muy formal para la ocasión
+          </p>
+          <p style={{ color: "#586e26" }}>
+            <span className="font-medium" style={{ color: "#4c0013" }}>• Rojo intenso</span> - muy llamativo
+          </p>
+          <p style={{ color: "#586e26" }}>
+            <span className="font-medium" style={{ color: "#4c0013" }}>• Colores neón</span> - muy brillantes
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* SECCIÓN 5: CONTADOR REGRESIVO */}
         <section className="py-20 relative">
@@ -656,7 +680,7 @@ export default function InvitationPage() {
                 className="text-sm mb-8 opacity-80"
                 style={{ color: "#4c0013" }}
               >
-                Fecha límite: 31 de Octubre 2025
+                Fecha límite: 20 de Noviembre 2025
               </p>
 
               <div className="flex gap-4 justify-center flex-wrap">
