@@ -599,6 +599,10 @@ Carlos & Karen`;
                           <option value="6">6 personas</option>
                           <option value="7">7 personas</option>
                           <option value="8">8 personas</option>
+                          <option value="9">9 personas</option>
+                          <option value="10">10 personas</option>
+                          <option value="11">11 personas</option>
+                          <option value="12">12 personas</option>
                         </select>
                       </div>
                       <button
