@@ -54,18 +54,18 @@ export default function Home() {
 
   const openWhatsApp = (family: Family) => {
     // Mensaje personalizado para WhatsApp
-const message = `¡Hola ${family.familyName}!
+    const message = `¡Hola ${family.familyName}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
 
 *20 de Diciembre de 2025*
 
-• Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-• Ceremonia Civil: 8:00 PM - Salon MONET  
-• Recepción: 8:30 PM - Salon MONET
+- Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+- Ceremonia Civil: 8:00 PM - Salon MONET  
+- Recepción: 8:30 PM - Salon MONET
 
 Por favor confirma tu asistencia:
-https://karen-carlos-wedding.vercel.app/invite/${family.invitationCode}
+https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}
 
 Espacios disponibles: *${family.maxGuests} personas*
 Fecha límite: *20 de Noviembre de 2025*
@@ -112,17 +112,18 @@ Carlos & Karen`;
       return;
     }
 
-   try {
-  setLoading(true);
-  await familiesApi.delete(familyId);
-  setFamilies(families.filter((f) => f.id !== familyId));
-  alert(`✅ Familia eliminada exitosamente`);
-} catch (error: unknown) {
-  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-  alert(`❌ Error: ${errorMessage}`);
-} finally {
-  setLoading(false);
-}
+    try {
+      setLoading(true);
+      await familiesApi.delete(familyId);
+      setFamilies(families.filter((f) => f.id !== familyId));
+      alert(`✅ Familia eliminada exitosamente`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      alert(`❌ Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
   const downloadExcel = async () => {
     try {
@@ -152,9 +153,10 @@ Carlos & Karen`;
       console.log("✅ Excel download completed");
       alert("✅ Excel descargado exitosamente");
     } catch (error: unknown) {
-  console.error("❌ Error downloading Excel:", error);
-  const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-  alert(`❌ Error al descargar Excel: ${errorMessage}`);
+      console.error("❌ Error downloading Excel:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      alert(`❌ Error al descargar Excel: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -441,48 +443,54 @@ Carlos & Karen`;
         {/* Modal Crear Invitación */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
-              <h3 className="text-xl font-semibold mb-4">Crear Invitación</h3>
+            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">
+                Crear Invitación
+              </h3>
 
               {!invitationType ? (
-                // Selección de tipo
+                // Selección de tipo con colores mejorados
                 <div className="space-y-4">
                   <button
                     onClick={() => setInvitationType("individual")}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-red-800 hover:bg-red-50 transition-colors"
+                    className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-red-800 hover:bg-red-50 transition-colors group"
                   >
                     <div className="text-4xl mb-2">👤</div>
-                    <div className="font-semibold">Invitación Individual</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="font-semibold text-gray-900 group-hover:text-red-800">
+                      Invitación Individual
+                    </div>
+                    <div className="text-sm text-gray-600 group-hover:text-red-700">
                       Para una persona
                     </div>
                   </button>
 
                   <button
                     onClick={() => setInvitationType("family")}
-                    className="w-full p-4 border-2 border-gray-200 rounded-lg hover:border-red-800 hover:bg-red-50 transition-colors"
+                    className="w-full p-4 border-2 border-gray-300 rounded-lg hover:border-red-800 hover:bg-red-50 transition-colors group"
                   >
                     <div className="text-4xl mb-2">👨‍👩‍👧‍👦</div>
-                    <div className="font-semibold">Invitación Familiar</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="font-semibold text-gray-900 group-hover:text-red-800">
+                      Invitación Familiar
+                    </div>
+                    <div className="text-sm text-gray-600 group-hover:text-red-700">
                       Para múltiples personas
                     </div>
                   </button>
                 </div>
               ) : (
-                // Formularios específicos
+                // Formularios específicos (aquí van los formularios que ya tienes)
                 <div>
                   <button
                     onClick={() => setInvitationType(null)}
-                    className="text-sm text-gray-500 hover:text-gray-700 mb-4"
+                    className="text-sm text-gray-700 hover:text-gray-900 mb-4 font-medium"
                   >
                     ← Volver
                   </button>
 
                   {invitationType === "individual" ? (
-                    // Formulario Individual
+                    // Formulario Individual con colores mejorados
                     <div className="space-y-4">
-                      <h4 className="font-semibold text-lg">
+                      <h4 className="font-semibold text-lg text-gray-900">
                         👤 Invitación Individual
                       </h4>
                       <input
@@ -492,7 +500,7 @@ Carlos & Karen`;
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <input
                         type="tel"
@@ -501,7 +509,7 @@ Carlos & Karen`;
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <input
                         type="email"
@@ -510,7 +518,7 @@ Carlos & Karen`;
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <button
                         onClick={createInvitation}
@@ -523,9 +531,9 @@ Carlos & Karen`;
                       </button>
                     </div>
                   ) : (
-                    // Formulario Familiar
+                    // Formulario Familiar con colores mejorados
                     <div className="space-y-4">
-                      <h4 className="font-semibold text-lg">
+                      <h4 className="font-semibold text-lg text-gray-900">
                         👨‍👩‍👧‍👦 Invitación Familiar
                       </h4>
                       <input
@@ -538,7 +546,7 @@ Carlos & Karen`;
                             familyName: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <input
                         type="text"
@@ -550,7 +558,7 @@ Carlos & Karen`;
                             contactPerson: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <input
                         type="tel"
@@ -559,7 +567,7 @@ Carlos & Karen`;
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <input
                         type="email"
@@ -568,10 +576,10 @@ Carlos & Karen`;
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-gray-900 mb-1">
                           Número de espacios
                         </label>
                         <select
@@ -582,7 +590,7 @@ Carlos & Karen`;
                               maxGuests: parseInt(e.target.value),
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                         >
                           <option value="2">2 personas</option>
                           <option value="3">3 personas</option>
@@ -610,7 +618,7 @@ Carlos & Karen`;
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={resetModal}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
                 >
                   Cancelar
                 </button>

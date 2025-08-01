@@ -1,6 +1,5 @@
 const API_BASE_URL = "https://weddinginvitationsapi-production.up.railway.app";
 
-
 export interface Family {
   id: number;
   familyName: string;
@@ -88,31 +87,31 @@ export const familiesApi = {
   },
 
   delete: async (familyId: number): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/api/families/${familyId}`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
-  });
-  
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Error al eliminar familia");
-  }
-  
-  return response.json();
-},
+    const response = await fetch(`${API_BASE_URL}/api/families/${familyId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
 
- exportExcel: async (): Promise<Blob> => {
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al eliminar familia");
+    }
+
+    return response.json();
+  },
+
+  exportExcel: async (): Promise<Blob> => {
     console.log("📊 Requesting Excel export...");
-    
+
     const response = await fetch(`${API_BASE_URL}/api/families/export-excel`);
-    
+
     console.log("📊 Excel response status:", response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Error al descargar Excel: ${errorText}`);
     }
-    
+
     return response.blob();
   },
 };
