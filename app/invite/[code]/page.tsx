@@ -500,35 +500,9 @@ export default function InvitationPage() {
             </h3>
 
             {/* Carrusel móvil */}
-            {/* Carrusel móvil con swipe y navegación */}
+{/* Carrusel móvil con swipe y navegación */}
 <div className="md:hidden">
   <div className="relative">
-    {/* Botón anterior */}
-    {currentEvent > 0 && (
-      <button
-        onClick={() => setCurrentEvent(currentEvent - 1)}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
-        aria-label="Evento anterior"
-      >
-        <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-    )}
-
-    {/* Botón siguiente */}
-    {currentEvent < events.length - 1 && (
-      <button
-        onClick={() => setCurrentEvent(currentEvent + 1)}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-80 rounded-full p-2 shadow-lg hover:bg-opacity-100 transition-all"
-        aria-label="Siguiente evento"
-      >
-        <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    )}
-
     {/* Área de swipe */}
     <div 
       className="overflow-hidden rounded-xl"
@@ -590,10 +564,11 @@ export default function InvitationPage() {
   {/* Instrucciones */}
   <div className="text-center mt-3">
     <p className="text-sm opacity-70" style={{ color: "#fffff0" }}>
-      👆 Desliza o usa las flechas para navegar
+      👆 Desliza para navegar
     </p>
   </div>
 </div>
+
 
             {/* Grid para desktop */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
