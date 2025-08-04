@@ -68,7 +68,7 @@ Por favor confirma tu asistencia:
 https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *20 de Noviembre de 2025*
+Fecha límite: *20 de Octubre de 2025*
 
 *Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
