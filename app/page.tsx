@@ -54,7 +54,7 @@ export default function Home() {
 
   const openWhatsApp = (family: Family) => {
     // Mensaje personalizado para WhatsApp
-    const message = `¡Hola ${family.familyName}!
+    const message = `¡Hola ${family.contactPerson}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
 
