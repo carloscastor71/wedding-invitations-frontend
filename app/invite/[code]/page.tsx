@@ -10,7 +10,6 @@ import {
 import GuestForm from "@/app/components/GuestForm";
 import { MapPin, Clock, Shirt, Heart } from "lucide-react";
 
-
 interface WeddingEvent {
   name: string;
   time: string;
@@ -18,6 +17,7 @@ interface WeddingEvent {
   address: string;
   icon: string;
 }
+const WEDDING_DATE = new Date("2025-12-20T17:30:00-06:00");
 
 export default function InvitationPage() {
   const params = useParams();
@@ -29,7 +29,7 @@ export default function InvitationPage() {
   const [responding, setResponding] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  
+
   // Estados para las transiciones elegantes
   const [showIntro, setShowIntro] = useState(true);
   const [introStage, setIntroStage] = useState(0);
@@ -43,8 +43,6 @@ export default function InvitationPage() {
     minutes: 0,
     seconds: 0,
   });
-
-  const weddingDate = new Date("2025-12-20T17:30:00-06:00");
 
   const events: WeddingEvent[] = [
     {
@@ -136,8 +134,7 @@ export default function InvitationPage() {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      const difference = weddingDate.getTime() - now.getTime();
-
+      const difference = WEDDING_DATE.getTime() - now.getTime();
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -151,7 +148,7 @@ export default function InvitationPage() {
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
-  }, [weddingDate]);
+  }, []);
 
   const handleResponse = async (attending: boolean) => {
     if (!invitation) return;
@@ -331,7 +328,7 @@ export default function InvitationPage() {
               </div>
 
               <h1
-                className="text-5xl md:text-7xl font-serif mb-6 tracking-wide leading-tight"
+                className="text-5xl md:text-7xl mb-6 tracking-wide leading-tight wedding-names"
                 style={{ color: "#4c0013" }}
               >
                 Karen
@@ -410,7 +407,7 @@ export default function InvitationPage() {
             </div>
 
             <h1
-              className="text-5xl md:text-7xl font-serif mb-6 tracking-wide leading-tight"
+              className="text-5xl md:text-7xl mb-6 tracking-wide leading-tight wedding-names"
               style={{
                 color: "#4c0013",
                 textShadow:
@@ -500,75 +497,74 @@ export default function InvitationPage() {
             </h3>
 
             {/* Carrusel móvil */}
-{/* Carrusel móvil con swipe y navegación */}
-<div className="md:hidden">
-  <div className="relative">
-    {/* Área de swipe */}
-    <div 
-      className="overflow-hidden rounded-xl"
-      onTouchStart={(e) => {
-        const touch = e.touches[0];
-        setTouchStart(touch.clientX);
-      }}
-      onTouchMove={(e) => {
-        if (!touchStart) return;
-        const currentTouch = e.touches[0].clientX;
-        const diff = touchStart - currentTouch;
-        
-        if (Math.abs(diff) > 50) {
-          if (diff > 0 && currentEvent < events.length - 1) {
-            setCurrentEvent(currentEvent + 1);
-          } else if (diff < 0 && currentEvent > 0) {
-            setCurrentEvent(currentEvent - 1);
-          }
-          setTouchStart(null);
-        }
-      }}
-      onTouchEnd={() => {
-        setTouchStart(null);
-      }}
-    >
-      <div
-        className="flex transition-transform duration-300 ease-in-out"
-        style={{ transform: `translateX(-${currentEvent * 100}%)` }}
-      >
-        {events.map((event, index) => (
-          <div key={index} className="w-full flex-shrink-0 px-4">
-            <EventCard event={event} onOpenMaps={openGoogleMaps} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+            {/* Carrusel móvil con swipe y navegación */}
+            <div className="md:hidden">
+              <div className="relative">
+                {/* Área de swipe */}
+                <div
+                  className="overflow-hidden rounded-xl"
+                  onTouchStart={(e) => {
+                    const touch = e.touches[0];
+                    setTouchStart(touch.clientX);
+                  }}
+                  onTouchMove={(e) => {
+                    if (!touchStart) return;
+                    const currentTouch = e.touches[0].clientX;
+                    const diff = touchStart - currentTouch;
 
-  {/* Indicadores mejorados */}
-  <div className="flex justify-center gap-3 mt-6">
-    {events.map((_, index) => (
-      <button
-        key={index}
-        onClick={() => setCurrentEvent(index)}
-        className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 ${
-          currentEvent === index ? "scale-125" : "scale-100"
-        }`}
-        style={{
-          backgroundColor:
-            currentEvent === index
-              ? "#fffff0"
-              : "rgba(255,255,240,0.4)",
-        }}
-        aria-label={`Ver ${events[index].name}`}
-      />
-    ))}
-  </div>
+                    if (Math.abs(diff) > 50) {
+                      if (diff > 0 && currentEvent < events.length - 1) {
+                        setCurrentEvent(currentEvent + 1);
+                      } else if (diff < 0 && currentEvent > 0) {
+                        setCurrentEvent(currentEvent - 1);
+                      }
+                      setTouchStart(null);
+                    }
+                  }}
+                  onTouchEnd={() => {
+                    setTouchStart(null);
+                  }}
+                >
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ transform: `translateX(-${currentEvent * 100}%)` }}
+                  >
+                    {events.map((event, index) => (
+                      <div key={index} className="w-full flex-shrink-0 px-4">
+                        <EventCard event={event} onOpenMaps={openGoogleMaps} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-  {/* Instrucciones */}
-  <div className="text-center mt-3">
-    <p className="text-sm opacity-70" style={{ color: "#fffff0" }}>
-      👆 Desliza para navegar
-    </p>
-  </div>
-</div>
+              {/* Indicadores mejorados */}
+              <div className="flex justify-center gap-3 mt-6">
+                {events.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentEvent(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 ${
+                      currentEvent === index ? "scale-125" : "scale-100"
+                    }`}
+                    style={{
+                      backgroundColor:
+                        currentEvent === index
+                          ? "#fffff0"
+                          : "rgba(255,255,240,0.4)",
+                    }}
+                    aria-label={`Ver ${events[index].name}`}
+                  />
+                ))}
+              </div>
 
+              {/* Instrucciones */}
+              <div className="text-center mt-3">
+                <p className="text-sm opacity-70" style={{ color: "#fffff0" }}>
+                  👆 Desliza para navegar
+                </p>
+              </div>
+            </div>
 
             {/* Grid para desktop */}
             <div className="hidden md:grid md:grid-cols-3 gap-6">
@@ -888,7 +884,7 @@ export default function InvitationPage() {
             <p className="opacity-90 mb-2" style={{ color: "#586e26" }}>
               Con amor,
             </p>
-            <p className="text-2xl font-serif" style={{ color: "#586e26" }}>
+            <p className="text-2xl wedding-names" style={{ color: "#586e26" }}>
               Carlos & Karen 💕
             </p>
           </div>

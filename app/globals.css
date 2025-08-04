@@ -10,6 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-dancing: var(--font-dancing-script); /* ✅ NUEVA VARIABLE */
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,3 +26,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.font-dancing {
+  font-family: var(--font-dancing-script), cursive;
+}
+
+.wedding-names {
+  font-family: var(--font-dancing-script), cursive;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
