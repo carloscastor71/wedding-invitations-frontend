@@ -459,7 +459,7 @@ export default function InvitationPage() {
                 textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
               }}
             >
-              ¡Hola {invitation.familyName}! 👋
+              ¡Hola {invitation.contactPerson}! 👋
             </h3>
             <div
               className="inline-block px-8 py-4 rounded-xl border-2 shadow-lg backdrop-blur-sm"
