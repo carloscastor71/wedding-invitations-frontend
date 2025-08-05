@@ -138,7 +138,7 @@ const GuestForm: React.FC<GuestFormProps> = ({
               </h3>
             </div>
             <p className="text-sm mb-3" style={{ color: "#586e26" }}>
-              Confirma o corrige el nombre de tu familia (ejemplo: "García López" si incluye ambos apellidos)
+              Confirma o corrige el nombre de tu familia (ejemplo: 'García López' si incluye ambos apellidos)
             </p>
             <input
               type="text"
@@ -150,7 +150,7 @@ const GuestForm: React.FC<GuestFormProps> = ({
             />
             {correctedFamilyName !== familyName && (
               <p className="text-xs mt-2 text-green-600">
-                ✅ Nombre actualizado de "{familyName}" a "{correctedFamilyName}"
+                ✅ Nombre actualizado de '{familyName}' a '{correctedFamilyName}'
               </p>
             )}
           </div>
