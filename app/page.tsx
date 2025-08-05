@@ -382,7 +382,7 @@ Carlos & Karen`;
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-lg font-bold text-gray-900">
-                          {family.familyName}
+                          {family.correctedFamilyName || family.familyName}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
