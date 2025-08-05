@@ -3,9 +3,11 @@ const API_BASE_URL = "https://weddinginvitationsapi-production.up.railway.app";
 export interface Family {
   id: number;
   familyName: string;
+  correctedFamilyName?: string; // ✅ NUEVO
   contactPerson: string;
   email?: string;
   phone: string;
+  country?: string; // ✅ NUEVO
   maxGuests: number;
   invitationCode: string;
   invitationSent: boolean;
@@ -24,13 +26,15 @@ export interface Family {
 export interface CreateFamilyRequest {
   familyName: string;
   contactPerson: string;
-  email: string;
-  phone?: string;
+  email?: string;
+  phone: string;
+  country?: string; // ✅ NUEVO
   maxGuests: number;
 }
 
 export interface InvitationData {
   familyName: string;
+  correctedFamilyName?: string; // ✅ NUEVO
   contactPerson: string;
   maxGuests: number;
   confirmedGuests: number;
@@ -47,6 +51,7 @@ export interface InvitationData {
     requiresConfirmation: boolean;
   }[];
 }
+
 export interface Guest {
   id?: number;
   name: string;
@@ -58,6 +63,7 @@ export interface Guest {
 export interface CompleteFormRequest {
   guests: Guest[];
   familyMessage?: string;
+  correctedFamilyName?: string; // ✅ NUEVO
 }
 
 export const familiesApi = {
@@ -91,27 +97,27 @@ export const familiesApi = {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
-
+    
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Error al eliminar familia");
     }
-
+    
     return response.json();
   },
 
   exportExcel: async (): Promise<Blob> => {
     console.log("📊 Requesting Excel export...");
-
+    
     const response = await fetch(`${API_BASE_URL}/api/families/export-excel`);
-
+    
     console.log("📊 Excel response status:", response.status);
-
+    
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Error al descargar Excel: ${errorText}`);
     }
-
+    
     return response.blob();
   },
 };
@@ -139,6 +145,7 @@ export const invitationApi = {
     }
     return response.json();
   },
+  
   completeForm: async (code: string, formData: CompleteFormRequest) => {
     const response = await fetch(
       `${API_BASE_URL}/api/invitation/${code}/complete-form`,

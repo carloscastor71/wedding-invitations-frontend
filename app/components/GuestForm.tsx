@@ -13,6 +13,7 @@ interface Guest {
 interface CompleteFormRequest {
   guests: Guest[];
   familyMessage?: string;
+  correctedFamilyName?: string; // ✅ NUEVO
 }
 
 interface GuestFormProps {
@@ -39,6 +40,7 @@ const GuestForm: React.FC<GuestFormProps> = ({
   );
 
   const [familyMessage, setFamilyMessage] = useState("");
+  const [correctedFamilyName, setCorrectedFamilyName] = useState(familyName); // ✅ NUEVO
   const [submitting, setSubmitting] = useState(false);
 
   const updateGuest = (
@@ -61,6 +63,11 @@ const GuestForm: React.FC<GuestFormProps> = ({
       return;
     }
 
+    if (!correctedFamilyName.trim()) {
+      alert("El nombre de familia es obligatorio");
+      return;
+    }
+
     setSubmitting(true);
     try {
       await onSubmit({
@@ -71,6 +78,9 @@ const GuestForm: React.FC<GuestFormProps> = ({
           notes: g.notes?.trim() || undefined,
         })),
         familyMessage: familyMessage.trim() || undefined,
+        correctedFamilyName: correctedFamilyName.trim() !== familyName 
+          ? correctedFamilyName.trim() 
+          : undefined, // ✅ Solo enviar si cambió
       });
     } catch (error: unknown) {
       const errorMessage =
@@ -113,12 +123,38 @@ const GuestForm: React.FC<GuestFormProps> = ({
             className="text-center text-sm opacity-90"
             style={{ color: "#fffff0" }}
           >
-            {familyName} • Espacios disponibles: {maxGuests} • Registrados:{" "}
+            {correctedFamilyName} • Espacios disponibles: {maxGuests} • Registrados:{" "}
             {filledGuests}
           </p>
         </div>
 
         <div className="p-6">
+          {/* ✅ NUEVO: Campo para corregir nombre de familia */}
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">👨‍👩‍👧‍👦</span>
+              <h3 className="text-lg font-semibold" style={{ color: "#4c0013" }}>
+                Nombre de Familia
+              </h3>
+            </div>
+            <p className="text-sm mb-3" style={{ color: "#586e26" }}>
+              Confirma o corrige el nombre de tu familia (ejemplo: "García López" si incluye ambos apellidos)
+            </p>
+            <input
+              type="text"
+              value={correctedFamilyName}
+              onChange={(e) => setCorrectedFamilyName(e.target.value)}
+              placeholder="Nombre completo de la familia"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 bg-white"
+              required
+            />
+            {correctedFamilyName !== familyName && (
+              <p className="text-xs mt-2 text-green-600">
+                ✅ Nombre actualizado de "{familyName}" a "{correctedFamilyName}"
+              </p>
+            )}
+          </div>
+
           <div className="mb-8">
             <div
               className="inline-block px-6 py-3 rounded-xl border-2 shadow-lg backdrop-blur-sm"

@@ -3,6 +3,13 @@
 import { useState, useEffect } from "react";
 import { familiesApi, Family } from "../lib/api";
 
+// ✅ AGREGAR AQUÍ - después de los imports
+const countries = [
+  { code: "MX", name: "México", prefix: "+52", flag: "🇲🇽" },
+  { code: "US", name: "Estados Unidos", prefix: "+1", flag: "🇺🇸" },
+  { code: "ES", name: "España", prefix: "+34", flag: "🇪🇸" },
+];
+
 export default function Home() {
   const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +24,7 @@ export default function Home() {
     name: "",
     email: "",
     phone: "",
+    country: "MX",
     familyName: "",
     contactPerson: "",
     maxGuests: 2,
@@ -47,12 +55,17 @@ export default function Home() {
       email: "",
       phone: "",
       familyName: "",
+      country: "MX",
       contactPerson: "",
       maxGuests: 2,
     });
   };
 
   const openWhatsApp = (family: Family) => {
+    // Obtener configuración del país
+    const country =
+      countries.find((c) => c.code === family.country) || countries[0];
+
     // Mensaje personalizado para WhatsApp
     const message = `¡Hola ${family.contactPerson}!
 
@@ -80,10 +93,27 @@ Carlos & Karen`;
     // Codificar mensaje para URL
     const encodedMessage = encodeURIComponent(message);
 
-    // Crear link de WhatsApp al número de la familia
-    const familyPhone = family.phone.replace(/\D/g, ""); // Quitar caracteres no numéricos
-    const whatsappUrl = `https://wa.me/52${familyPhone}?text=${encodedMessage}`;
-    //                                   ↑ Tu número personal aquí
+    let formattedPhone = family.phone.replace(/\D/g, "");
+
+    switch (family.country) {
+      case "MX":
+        if (formattedPhone.length === 10) {
+          formattedPhone = `52${formattedPhone}`;
+        }
+        break;
+      case "US":
+        if (formattedPhone.length === 10) {
+          formattedPhone = `1${formattedPhone}`;
+        }
+        break;
+      case "ES":
+        if (formattedPhone.length === 9) {
+          formattedPhone = `34${formattedPhone}`;
+        }
+        break;
+    }
+
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
     // Abrir WhatsApp
     window.open(whatsappUrl, "_blank");
 
@@ -184,6 +214,7 @@ Carlos & Karen`;
           contactPerson: formData.name,
           email: formData.email || undefined,
           phone: formData.phone,
+          country: formData.country,
           maxGuests: 1,
         };
       } else {
@@ -197,6 +228,7 @@ Carlos & Karen`;
           contactPerson: formData.contactPerson,
           email: formData.email || undefined,
           phone: formData.phone,
+          country: formData.country,
           maxGuests: formData.maxGuests,
         };
       }
@@ -493,6 +525,7 @@ Carlos & Karen`;
                       <h4 className="font-semibold text-lg text-gray-900">
                         👤 Invitación Individual
                       </h4>
+
                       <input
                         type="text"
                         placeholder="Nombre completo"
@@ -502,15 +535,68 @@ Carlos & Karen`;
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
-                      <input
-                        type="tel"
-                        placeholder="Teléfono WhatsApp"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
-                      />
+
+                      {/* ✅ NUEVO: Selector de País */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">
+                          País / Country
+                        </label>
+                        <select
+                          value={formData.country}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              country: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
+                        >
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.flag} {country.name} ({country.prefix})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* ✅ Teléfono con prefix dinámico */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">
+                          Teléfono WhatsApp
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-900 text-sm">
+                            {countries.find((c) => c.code === formData.country)
+                              ?.prefix || "+52"}
+                          </span>
+                          <input
+                            type="tel"
+                            placeholder={
+                              formData.country === "MX"
+                                ? "6141234567"
+                                : formData.country === "US"
+                                ? "5551234567"
+                                : "612345678"
+                            }
+                            value={formData.phone}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                phone: e.target.value,
+                              })
+                            }
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formData.country === "MX" &&
+                            "10 dígitos (sin 044/045)"}
+                          {formData.country === "US" &&
+                            "10 dígitos (área + número)"}
+                          {formData.country === "ES" && "9 dígitos"}
+                        </p>
+                      </div>
+
                       <input
                         type="email"
                         placeholder="Email (opcional)"
@@ -520,6 +606,7 @@ Carlos & Karen`;
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
+
                       <button
                         onClick={createInvitation}
                         disabled={isCreating}
@@ -560,15 +647,63 @@ Carlos & Karen`;
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                       />
-                      <input
-                        type="tel"
-                        placeholder="Teléfono WhatsApp"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
-                      />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">
+                          País / Country
+                        </label>
+                        <select
+                          value={formData.country}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              country: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
+                        >
+                          {countries.map((country) => (
+                            <option key={country.code} value={country.code}>
+                              {country.flag} {country.name} ({country.prefix})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-900 mb-1">
+                          Teléfono WhatsApp
+                        </label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-900 text-sm">
+                            {countries.find((c) => c.code === formData.country)
+                              ?.prefix || "+52"}
+                          </span>
+                          <input
+                            type="tel"
+                            placeholder={
+                              formData.country === "MX"
+                                ? "6141234567"
+                                : formData.country === "US"
+                                ? "5551234567"
+                                : "612345678"
+                            }
+                            value={formData.phone}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                phone: e.target.value,
+                              })
+                            }
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formData.country === "MX" &&
+                            "10 dígitos (sin 044/045)"}
+                          {formData.country === "US" &&
+                            "10 dígitos (área + número)"}
+                          {formData.country === "ES" && "9 dígitos"}
+                        </p>
+                      </div>
                       <input
                         type="email"
                         placeholder="Email (opcional)"
