@@ -176,11 +176,11 @@ Carlos & Karen ❤️`;
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
 
-*20 de Diciembre de 2025*
-
-- Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-- Ceremonia Civil: 8:00 PM - Salon MONET  
-- Recepción: 8:30 PM - Salon MONET
+*Detalles del evento:*
+📅 20 de Diciembre de 2025
+⛪ Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+💒 Ceremonia Civil: 8:00 PM - Salon MONET  
+🎉 Recepción: 8:30 PM - Salon MONET
 
 Por favor confirma tu asistencia:
 ${originalUrl}
