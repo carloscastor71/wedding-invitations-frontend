@@ -66,7 +66,10 @@ export default function Home() {
     const country =
       countries.find((c) => c.code === family.country) || countries[0];
 
-    // Mensaje personalizado para WhatsApp
+    // URL de la invitación (separada en su propia línea)
+    const invitationUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
+
+    // Mensaje personalizado para WhatsApp - con la URL en líneas separadas
     const message = `¡Hola ${family.contactPerson}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
@@ -77,8 +80,9 @@ Carlos y Karen nos casamos y queremos celebrarlo contigo!
 - Ceremonia Civil: 8:00 PM - Salon MONET  
 - Recepción: 8:30 PM - Salon MONET
 
-Por favor confirma tu asistencia:
-https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}
+Por favor confirma tu asistencia en este enlace:
+
+${invitationUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
 Fecha límite: *20 de Octubre de 2025*
@@ -114,6 +118,7 @@ Carlos & Karen`;
     }
 
     const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+    
     // Abrir WhatsApp
     window.open(whatsappUrl, "_blank");
 
@@ -122,7 +127,6 @@ Carlos & Karen`;
       markAsSent(family.id);
     }, 2000);
   };
-
   const markAsSent = async (familyId: number) => {
     try {
       // Actualizar en base de datos
