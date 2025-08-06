@@ -592,7 +592,10 @@ export default function InvitationPage() {
             </div>
             <h3
               className="text-3xl font-serif mb-6"
-              style={{ color: "#4c0013" }}
+              style={{
+                color: "#fffff0",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
             >
               Código de Vestimenta
             </h3>
@@ -658,7 +661,73 @@ export default function InvitationPage() {
             </div>
           </div>
         </section>
+        {/* SECCIÓN 4.5: MESA DE REGALOS */}
+        <section className="py-20 px-6 relative">
+          <div className="max-w-2xl mx-auto text-center relative z-10">
+            <div className="flex justify-center mb-6">
+              <div
+                className="p-4 rounded-full shadow-lg"
+                style={{ backgroundColor: "#4c0013" }}
+              >
+                <Heart className="w-8 h-8 text-white" fill="white" />
+              </div>
+            </div>
 
+            <h3
+              className="text-3xl font-serif mb-6"
+              style={{
+                color: "#fffff0",
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
+              Un Detalle de Amor
+            </h3>
+
+            <div
+              className="backdrop-blur-sm rounded-xl shadow-lg p-6 border-l-4"
+              style={{
+                background: `linear-gradient(135deg, rgba(255,255,240,0.4) 100%, rgba(255,255,240,0.3) 60%, rgba(88,110,38,0.2) 100%)`,
+                borderColor: "#586e26",
+                color: "#4c0013",
+              }}
+            >
+              <p
+                className="text-lg mb-4 leading-relaxed"
+                style={{ color: "#4c0013" }}
+              >
+                Tu presencia es el regalo más valioso que podemos recibir.
+              </p>
+
+              <p className="text-lg mb-4" style={{ color: "#586e26" }}>
+                Si deseas tener un detalle adicional con nosotros, preferimos
+                que sea una contribución para iniciar este nuevo capítulo
+                juntos.
+              </p>
+
+              <div
+                className="w-16 h-px mx-auto my-4"
+                style={{ backgroundColor: "#4c0013", opacity: 0.3 }}
+              ></div>
+
+              <p
+                className="text-base mb-4 font-medium"
+                style={{ color: "#4c0013" }}
+              >
+                
+                Lo más importante es celebrar contigo este día tan especial.
+              </p>
+
+              <div
+                className="mt-6 pt-4 border-t"
+                style={{ borderColor: "rgba(76,0,19,0.2)" }}
+              >
+                <p className="text-sm italic" style={{ color: "#586e26" }}>
+                  💌 Habrá un buzón en la recepción.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* SECCIÓN 5: CONTADOR REGRESIVO */}
         <section className="py-20 relative">
           <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
@@ -720,7 +789,10 @@ export default function InvitationPage() {
             <div className="max-w-2xl mx-auto text-center relative z-10">
               <h3
                 className="text-3xl font-serif mb-6"
-                style={{ color: "#4c0013" }}
+                style={{
+                  color: "#fffff0",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+                }}
               >
                 Confirma tu Asistencia
               </h3>
@@ -732,7 +804,7 @@ export default function InvitationPage() {
                 className="text-sm mb-8 opacity-80"
                 style={{ color: "#4c0013" }}
               >
-                Fecha límite: 20 de Noviembre 2025
+                Fecha límite: 20 de Octubre 2025
               </p>
 
               <div className="flex gap-4 justify-center flex-wrap">
@@ -793,7 +865,10 @@ export default function InvitationPage() {
             <div className="max-w-2xl mx-auto text-center relative z-10">
               <h3
                 className="text-3xl font-serif mb-6"
-                style={{ color: "#4c0013" }}
+                style={{
+                  color: "#fffff0",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+                }}
               >
                 ¡Gracias por confirmar!
               </h3>
@@ -830,7 +905,10 @@ export default function InvitationPage() {
             <div className="max-w-2xl mx-auto text-center relative z-10">
               <h3
                 className="text-3xl font-serif mb-6"
-                style={{ color: "#4c0013" }}
+                style={{
+                  color: "#fffff0",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+                }}
               >
                 {invitation.isAttending
                   ? "¡Todo Listo!"
