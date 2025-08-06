@@ -61,15 +61,28 @@ export default function Home() {
     });
   };
 
-  const openWhatsApp = (family: Family) => {
-    // Obtener configuración del país
-    const country =
-      countries.find((c) => c.code === family.country) || countries[0];
+  // PASO 1: Reemplaza tu función openWhatsApp actual con esta:
 
-    // Mensaje personalizado para WhatsApp
+const openWhatsApp = async (family: Family) => {
+  console.log('🔗 Iniciando proceso de acortar enlace para:', family.contactPerson);
+  
+  try {
+    // URL original larga
+    const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
+    console.log('📏 URL original:', originalUrl, `(${originalUrl.length} caracteres)`);
+    
+    // Acortar con TinyURL
+    console.log('⏳ Acortando enlace con TinyURL...');
+    const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(originalUrl)}`);
+    const shortUrl = await tinyUrlResponse.text();
+    
+    console.log('✅ URL acortada:', shortUrl, `(${shortUrl.length} caracteres)`);
+    console.log('📉 Reducción:', originalUrl.length - shortUrl.length, 'caracteres');
+
+    // Crear mensaje de WhatsApp
     const message = `¡Hola ${family.contactPerson}!
 
-Carlos y Karen nos casamos y queremos celebrarlo contigo!
+Carlos y Karen nos casamos y queremos celebrarlo contigo! 💍
 
 *20 de Diciembre de 2025*
 
@@ -77,8 +90,9 @@ Carlos y Karen nos casamos y queremos celebrarlo contigo!
 - Ceremonia Civil: 8:00 PM - Salon MONET  
 - Recepción: 8:30 PM - Salon MONET
 
-Por favor confirma tu asistencia:
-https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}
+Confirma tu asistencia aquí:
+
+${shortUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
 Fecha límite: *20 de Octubre de 2025*
@@ -88,11 +102,12 @@ Fecha límite: *20 de Octubre de 2025*
 ¡Esperamos verte en nuestro gran día!
 
 Con amor,
-Carlos & Karen`;
+Carlos & Karen ❤️`;
 
     // Codificar mensaje para URL
     const encodedMessage = encodeURIComponent(message);
 
+    // Formatear teléfono según país
     let formattedPhone = family.phone.replace(/\D/g, "");
 
     switch (family.country) {
@@ -114,15 +129,84 @@ Carlos & Karen`;
     }
 
     const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+    console.log('📱 Abriendo WhatsApp...');
+    
     // Abrir WhatsApp
     window.open(whatsappUrl, "_blank");
 
     // Marcar como enviada después de 2 segundos
     setTimeout(() => {
       markAsSent(family.id);
+      console.log('✅ Invitación marcada como enviada');
     }, 2000);
-  };
+    
+  } catch (error) {
+    console.error('❌ Error acortando URL:', error);
+    alert('⚠️ Error al generar enlace corto. Usando enlace original...');
+    
+    // Si falla, usar función original como fallback
+    openWhatsAppOriginal(family);
+  }
+};
 
+// PASO 2: Crear función de respaldo (por si TinyURL falla)
+const openWhatsAppOriginal = (family: Family) => {
+  console.log('🔄 Usando enlace original como respaldo');
+  
+  // Tu código original aquí (sin async)
+  const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
+  
+  const message = `¡Hola ${family.contactPerson}!
+
+Carlos y Karen nos casamos y queremos celebrarlo contigo!
+
+*20 de Diciembre de 2025*
+
+- Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+- Ceremonia Civil: 8:00 PM - Salon MONET  
+- Recepción: 8:30 PM - Salon MONET
+
+Por favor confirma tu asistencia:
+${originalUrl}
+
+Espacios disponibles: *${family.maxGuests} personas*
+Fecha límite: *20 de Octubre de 2025*
+
+*Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
+
+¡Esperamos verte en nuestro gran día!
+
+Con amor,
+Carlos & Karen`;
+
+  const encodedMessage = encodeURIComponent(message);
+  let formattedPhone = family.phone.replace(/\D/g, "");
+
+  switch (family.country) {
+    case "MX":
+      if (formattedPhone.length === 10) {
+        formattedPhone = `52${formattedPhone}`;
+      }
+      break;
+    case "US":
+      if (formattedPhone.length === 10) {
+        formattedPhone = `1${formattedPhone}`;
+      }
+      break;
+    case "ES":
+      if (formattedPhone.length === 9) {
+        formattedPhone = `34${formattedPhone}`;
+      }
+      break;
+  }
+
+  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+  window.open(whatsappUrl, "_blank");
+
+  setTimeout(() => {
+    markAsSent(family.id);
+  }, 2000);
+};
   const markAsSent = async (familyId: number) => {
     try {
       // Actualizar en base de datos
