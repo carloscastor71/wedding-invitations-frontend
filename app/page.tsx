@@ -61,26 +61,43 @@ export default function Home() {
     });
   };
 
-  // PASO 1: Reemplaza tu función openWhatsApp actual con esta:
+  const openWhatsApp = async (family: Family) => {
+    console.log(
+      "🔗 Iniciando proceso de acortar enlace para:",
+      family.contactPerson
+    );
 
-const openWhatsApp = async (family: Family) => {
-  console.log('🔗 Iniciando proceso de acortar enlace para:', family.contactPerson);
-  
-  try {
-    // URL original larga
-    const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
-    console.log('📏 URL original:', originalUrl, `(${originalUrl.length} caracteres)`);
-    
-    // Acortar con TinyURL
-    console.log('⏳ Acortando enlace con TinyURL...');
-    const tinyUrlResponse = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(originalUrl)}`);
-    const shortUrl = await tinyUrlResponse.text();
-    
-    console.log('✅ URL acortada:', shortUrl, `(${shortUrl.length} caracteres)`);
-    console.log('📉 Reducción:', originalUrl.length - shortUrl.length, 'caracteres');
+    try {
+      // URL original larga
+      const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
+      console.log(
+        "📏 URL original:",
+        originalUrl,
+        `(${originalUrl.length} caracteres)`
+      );
 
-    // Crear mensaje de WhatsApp
-    const message = `¡Hola ${family.contactPerson}!
+      // Acortar con TinyURL
+      console.log("⏳ Acortando enlace con TinyURL...");
+      const tinyUrlResponse = await fetch(
+        `https://tinyurl.com/api-create.php?url=${encodeURIComponent(
+          originalUrl
+        )}`
+      );
+      const shortUrl = await tinyUrlResponse.text();
+
+      console.log(
+        "✅ URL acortada:",
+        shortUrl,
+        `(${shortUrl.length} caracteres)`
+      );
+      console.log(
+        "📉 Reducción:",
+        originalUrl.length - shortUrl.length,
+        "caracteres"
+      );
+
+      // Crear mensaje de WhatsApp
+      const message = `¡Hola ${family.contactPerson}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo! 💍
 
@@ -104,59 +121,58 @@ Fecha límite: *20 de Octubre de 2025*
 Con amor,
 Carlos & Karen ❤️`;
 
-    // Codificar mensaje para URL
-    const encodedMessage = encodeURIComponent(message);
+      // Codificar mensaje para URL
+      const encodedMessage = encodeURIComponent(message);
 
-    // Formatear teléfono según país
-    let formattedPhone = family.phone.replace(/\D/g, "");
+      // Formatear teléfono según país
+      let formattedPhone = family.phone.replace(/\D/g, "");
 
-    switch (family.country) {
-      case "MX":
-        if (formattedPhone.length === 10) {
-          formattedPhone = `52${formattedPhone}`;
-        }
-        break;
-      case "US":
-        if (formattedPhone.length === 10) {
-          formattedPhone = `1${formattedPhone}`;
-        }
-        break;
-      case "ES":
-        if (formattedPhone.length === 9) {
-          formattedPhone = `34${formattedPhone}`;
-        }
-        break;
+      switch (family.country) {
+        case "MX":
+          if (formattedPhone.length === 10) {
+            formattedPhone = `52${formattedPhone}`;
+          }
+          break;
+        case "US":
+          if (formattedPhone.length === 10) {
+            formattedPhone = `1${formattedPhone}`;
+          }
+          break;
+        case "ES":
+          if (formattedPhone.length === 9) {
+            formattedPhone = `34${formattedPhone}`;
+          }
+          break;
+      }
+
+      const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+      console.log("📱 Abriendo WhatsApp...");
+
+      // Abrir WhatsApp
+      window.open(whatsappUrl, "_blank");
+
+      // Marcar como enviada después de 2 segundos
+      setTimeout(() => {
+        markAsSent(family.id);
+        console.log("✅ Invitación marcada como enviada");
+      }, 2000);
+    } catch (error) {
+      console.error("❌ Error acortando URL:", error);
+      alert("⚠️ Error al generar enlace corto. Usando enlace original...");
+
+      // Si falla, usar función original como fallback
+      openWhatsAppOriginal(family);
     }
+  };
 
-    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-    console.log('📱 Abriendo WhatsApp...');
-    
-    // Abrir WhatsApp
-    window.open(whatsappUrl, "_blank");
+  // PASO 2: Crear función de respaldo (por si TinyURL falla)
+  const openWhatsAppOriginal = (family: Family) => {
+    console.log("🔄 Usando enlace original como respaldo");
 
-    // Marcar como enviada después de 2 segundos
-    setTimeout(() => {
-      markAsSent(family.id);
-      console.log('✅ Invitación marcada como enviada');
-    }, 2000);
-    
-  } catch (error) {
-    console.error('❌ Error acortando URL:', error);
-    alert('⚠️ Error al generar enlace corto. Usando enlace original...');
-    
-    // Si falla, usar función original como fallback
-    openWhatsAppOriginal(family);
-  }
-};
+    // Tu código original aquí (sin async)
+    const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
 
-// PASO 2: Crear función de respaldo (por si TinyURL falla)
-const openWhatsAppOriginal = (family: Family) => {
-  console.log('🔄 Usando enlace original como respaldo');
-  
-  // Tu código original aquí (sin async)
-  const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
-  
-  const message = `¡Hola ${family.contactPerson}!
+    const message = `¡Hola ${family.contactPerson}!
 
 Carlos y Karen nos casamos y queremos celebrarlo contigo!
 
@@ -179,34 +195,104 @@ Fecha límite: *20 de Octubre de 2025*
 Con amor,
 Carlos & Karen`;
 
-  const encodedMessage = encodeURIComponent(message);
-  let formattedPhone = family.phone.replace(/\D/g, "");
+    const encodedMessage = encodeURIComponent(message);
+    let formattedPhone = family.phone.replace(/\D/g, "");
 
-  switch (family.country) {
-    case "MX":
-      if (formattedPhone.length === 10) {
-        formattedPhone = `52${formattedPhone}`;
-      }
-      break;
-    case "US":
-      if (formattedPhone.length === 10) {
-        formattedPhone = `1${formattedPhone}`;
-      }
-      break;
-    case "ES":
-      if (formattedPhone.length === 9) {
-        formattedPhone = `34${formattedPhone}`;
-      }
-      break;
-  }
+    switch (family.country) {
+      case "MX":
+        if (formattedPhone.length === 10) {
+          formattedPhone = `52${formattedPhone}`;
+        }
+        break;
+      case "US":
+        if (formattedPhone.length === 10) {
+          formattedPhone = `1${formattedPhone}`;
+        }
+        break;
+      case "ES":
+        if (formattedPhone.length === 9) {
+          formattedPhone = `34${formattedPhone}`;
+        }
+        break;
+    }
 
-  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-  window.open(whatsappUrl, "_blank");
+    const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
 
-  setTimeout(() => {
-    markAsSent(family.id);
-  }, 2000);
-};
+    setTimeout(() => {
+      markAsSent(family.id);
+    }, 2000);
+  };
+
+  // Nueva función específica para recordatorios
+  const openWhatsAppReminder = async (family: Family) => {
+    console.log("🔔 Enviando recordatorio para:", family.contactPerson);
+
+    try {
+      const originalUrl = `https://wedding-invitations-frontend.vercel.app/invite/${family.invitationCode}`;
+
+      const tinyUrlResponse = await fetch(
+        `https://tinyurl.com/api-create.php?url=${encodeURIComponent(
+          originalUrl
+        )}`
+      );
+      const shortUrl = await tinyUrlResponse.text();
+
+      // MENSAJE ESPECIAL PARA RECORDATORIO
+      const message = `¡Hola de nuevo ${family.contactPerson}! 👋
+
+Este es un recordatorio con el enlace corregido para confirmar tu asistencia a nuestra boda.
+
+Hemos observado que algunos enlaces no llegaban correctamente, por lo que enviamos este nuevo enlace:
+
+${shortUrl}
+
+*Detalles del evento:*
+📅 20 de Diciembre de 2025
+⛪ Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
+💒 Ceremonia Civil: 8:00 PM - Salon MONET  
+🎉 Recepción: 8:30 PM - Salon MONET
+
+Espacios disponibles: *${family.maxGuests} personas*
+Fecha límite: *20 de Octubre de 2025*
+
+Si tienes algún problema con este enlace o necesitas ayuda, por favor contáctanos directamente por WhatsApp.
+
+¡Esperamos verte en nuestro gran día!
+
+Con amor,
+Carlos & Karen ❤️`;
+
+      const encodedMessage = encodeURIComponent(message);
+      let formattedPhone = family.phone.replace(/\D/g, "");
+
+      switch (family.country) {
+        case "MX":
+          if (formattedPhone.length === 10) {
+            formattedPhone = `52${formattedPhone}`;
+          }
+          break;
+        case "US":
+          if (formattedPhone.length === 10) {
+            formattedPhone = `1${formattedPhone}`;
+          }
+          break;
+        case "ES":
+          if (formattedPhone.length === 9) {
+            formattedPhone = `34${formattedPhone}`;
+          }
+          break;
+      }
+
+      const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+      window.open(whatsappUrl, "_blank");
+
+      console.log("✅ Recordatorio enviado");
+    } catch (error) {
+      console.error("❌ Error enviando recordatorio:", error);
+      alert("⚠️ Error al enviar recordatorio");
+    }
+  };
   const markAsSent = async (familyId: number) => {
     try {
       // Actualizar en base de datos
@@ -518,7 +604,7 @@ Carlos & Karen`;
                             </button>
                           ) : (
                             <button
-                              onClick={() => openWhatsApp(family)}
+                              onClick={() => openWhatsAppReminder(family)}
                               className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors text-sm font-medium"
                             >
                               🔔 Recordatorio
