@@ -112,7 +112,7 @@ Confirma tu asistencia aquí:
 ${shortUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *20 de Octubre de 2025*
+Fecha límite: *10 de Noviembre de 2025*
 
 *Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
@@ -186,7 +186,7 @@ Por favor confirma tu asistencia:
 ${originalUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *20 de Octubre de 2025*
+Fecha límite: *10 de Noviembre de 2025*
 
 *Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
@@ -254,7 +254,7 @@ ${shortUrl}
 🎉 Recepción: 8:30 PM - Salon MONET
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *20 de Octubre de 2025*
+Fecha límite: *10 de Noviembre de 2025*
 
 Si tienes algún problema con este enlace o necesitas ayuda, por favor contáctanos directamente por WhatsApp.
 
