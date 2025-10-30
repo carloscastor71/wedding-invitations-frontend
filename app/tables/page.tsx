@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import TableCard from '@/app/components/tables/TableCard';
+import GuestsList from '@/app/components/tables/GuestsList';
 import { tablesApi, TableSummary, TableStats } from '@/lib/api';
 
 export default function TablesPage() {
@@ -159,20 +160,9 @@ export default function TablesPage() {
           )}
         </section>
 
-        {/* PLACEHOLDER PARA LISTA DE INVITADOS */}
-        <section className="bg-white rounded-lg shadow p-6">
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
-              Lista de Invitados
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Próximamente: Lista paginada de invitados con asignación de mesas
-            </p>
-            <div className="inline-flex items-center gap-2 text-sm text-gray-400">
-              <span>🚧</span>
-              <span>En construcción...</span>
-            </div>
-          </div>
+        {/* LISTA DE INVITADOS CON ASIGNACIÓN */}
+        <section>
+          <GuestsList onDataChange={loadData} />
         </section>
 
       </main>

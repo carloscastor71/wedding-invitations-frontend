@@ -804,7 +804,7 @@ export default function InvitationPage() {
                 className="text-sm mb-8 opacity-80"
                 style={{ color: "#4c0013" }}
               >
-                Fecha límite: 20 de Octubre 2025
+                Fecha límite: 10 de Noviembre 2025
               </p>
 
               <div className="flex gap-4 justify-center flex-wrap">
