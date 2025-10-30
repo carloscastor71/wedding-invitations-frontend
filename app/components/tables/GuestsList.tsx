@@ -3,10 +3,10 @@ import GuestRow from '@/app/components/tables/Guestrow';
 import { familiesApi, tablesApi, GuestAssignment, AvailableTable, GuestsAssignmentResponse } from '@/lib/api';
 
 interface GuestsListProps {
-  onDataChange: () => void; // Callback para refrescar mesas y estadísticas
+  onTableAssignment: (oldTableId: number | null, newTableId: number | null) => void; // Callback para actualizar mesas sin recargar
 }
 
-export default function GuestsList({ onDataChange }: GuestsListProps) {
+export default function GuestsList({ onTableAssignment }: GuestsListProps) {
   const [guests, setGuests] = useState<GuestAssignment[]>([]);
   const [availableTables, setAvailableTables] = useState<AvailableTable[]>([]);
   const [pagination, setPagination] = useState({
@@ -51,12 +51,23 @@ export default function GuestsList({ onDataChange }: GuestsListProps) {
   };
 
   // Manejar cambio en la asignación de un invitado
-  const handleAssignmentChange = async () => {
-    // Recargar datos locales
-    await loadData();
+  const handleAssignmentChange = async (
+    guestId: number, 
+    oldTableId: number | null, 
+    newTableId: number | null,
+    newTableName: string | null
+  ) => {
+    // Actualizar el invitado localmente en el array
+    setGuests(prevGuests => 
+      prevGuests.map(g => 
+        g.id === guestId 
+          ? { ...g, tableId: newTableId, tableName: newTableName }
+          : g
+      )
+    );
     
-    // Notificar al componente padre para que actualice mesas y estadísticas
-    onDataChange();
+    // Notificar al componente padre para que actualice solo las mesas afectadas
+    onTableAssignment(oldTableId, newTableId);
   };
 
   // Manejar cambio de página
@@ -105,7 +116,7 @@ export default function GuestsList({ onDataChange }: GuestsListProps) {
 
   return (
     <div className="bg-white rounded-lg shadow">
-      {/* Header con título y búsqueda */}
+      {/* Header con título, búsqueda y botón actualizar */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -117,15 +128,25 @@ export default function GuestsList({ onDataChange }: GuestsListProps) {
             </p>
           </div>
 
-          {/* Buscador */}
-          <div className="w-full sm:w-64">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {/* Buscador */}
             <input
               type="text"
               placeholder="Buscar por nombre o familia..."
               value={searchFilter}
               onChange={handleSearchChange}
-              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full sm:w-64 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
+            
+            {/* Botón de recarga manual */}
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+            >
+              <span className={loading ? 'animate-spin' : ''}>↻</span>
+              <span>Actualizar</span>
+            </button>
           </div>
         </div>
       </div>
@@ -257,16 +278,6 @@ export default function GuestsList({ onDataChange }: GuestsListProps) {
                 »»
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Indicador de carga flotante */}
-      {loading && guests.length > 0 && (
-        <div className="absolute top-4 right-4">
-          <div className="bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-600">Actualizando...</span>
           </div>
         </div>
       )}

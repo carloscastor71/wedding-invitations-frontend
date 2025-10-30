@@ -38,6 +38,76 @@ export default function TablesPage() {
     }
   };
 
+  // Actualizar solo las mesas afectadas sin recargar toda la página
+  const handleTableAssignment = (oldTableId: number | null, newTableId: number | null) => {
+    // Actualizar ocupación de las mesas afectadas
+    setTables(prevTables => 
+      prevTables.map(table => {
+        // Si es la mesa anterior, decrementar ocupación
+        if (oldTableId && table.id === oldTableId) {
+          const newOccupancy = Math.max(0, table.currentOccupancy - 1);
+          const newAvailable = table.maxCapacity - newOccupancy;
+          const newPercentage = (newOccupancy / table.maxCapacity) * 100;
+          return {
+            ...table,
+            currentOccupancy: newOccupancy,
+            availableSeats: newAvailable,
+            percentageOccupied: newPercentage,
+            isFull: newOccupancy >= table.maxCapacity
+          };
+        }
+        
+        // Si es la mesa nueva, incrementar ocupación
+        if (newTableId && table.id === newTableId) {
+          const newOccupancy = Math.min(table.maxCapacity, table.currentOccupancy + 1);
+          const newAvailable = table.maxCapacity - newOccupancy;
+          const newPercentage = (newOccupancy / table.maxCapacity) * 100;
+          return {
+            ...table,
+            currentOccupancy: newOccupancy,
+            availableSeats: newAvailable,
+            percentageOccupied: newPercentage,
+            isFull: newOccupancy >= table.maxCapacity
+          };
+        }
+        
+        return table;
+      })
+    );
+
+    // Actualizar estadísticas
+    setStats(prevStats => {
+      if (!prevStats) return null;
+      
+      // Si cambió de "sin asignar" a "asignado"
+      if (!oldTableId && newTableId) {
+        return {
+          ...prevStats,
+          assignedGuests: prevStats.assignedGuests + 1,
+          unassignedGuests: Math.max(0, prevStats.unassignedGuests - 1),
+          totalOccupied: prevStats.totalOccupied + 1,
+          availableSeats: prevStats.availableSeats - 1,
+          percentageAssigned: ((prevStats.assignedGuests + 1) / prevStats.totalGuests) * 100
+        };
+      }
+      
+      // Si cambió de "asignado" a "sin asignar"
+      if (oldTableId && !newTableId) {
+        return {
+          ...prevStats,
+          assignedGuests: Math.max(0, prevStats.assignedGuests - 1),
+          unassignedGuests: prevStats.unassignedGuests + 1,
+          totalOccupied: Math.max(0, prevStats.totalOccupied - 1),
+          availableSeats: prevStats.availableSeats + 1,
+          percentageAssigned: ((prevStats.assignedGuests - 1) / prevStats.totalGuests) * 100
+        };
+      }
+      
+      // Si solo cambió de mesa (asignado a asignado), stats no cambian
+      return prevStats;
+    });
+  };
+
   // Estado de carga
   if (loading) {
     return (
@@ -162,7 +232,7 @@ export default function TablesPage() {
 
         {/* LISTA DE INVITADOS CON ASIGNACIÓN */}
         <section>
-          <GuestsList onDataChange={loadData} />
+          <GuestsList onTableAssignment={handleTableAssignment} />
         </section>
 
       </main>

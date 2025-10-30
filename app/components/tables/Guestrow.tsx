@@ -4,7 +4,7 @@ import { GuestAssignment, AvailableTable, tablesApi } from '@/lib/api';
 interface GuestRowProps {
   guest: GuestAssignment;
   availableTables: AvailableTable[];
-  onAssignmentChange: () => void; // Callback para refrescar datos
+  onAssignmentChange: (guestId: number, oldTableId: number | null, newTableId: number | null, newTableName: string | null) => void; // Callback con datos del cambio
 }
 
 export default function GuestRow({ guest, availableTables, onAssignmentChange }: GuestRowProps) {
@@ -15,25 +15,42 @@ export default function GuestRow({ guest, availableTables, onAssignmentChange }:
   const handleTableChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
     
+    // Guardar valores anteriores
+    const oldTableId = guest.tableId;
+    const oldTableName = guest.tableName;
+    
     try {
       setIsAssigning(true);
       setError(null);
 
       // Si selecciona "Sin asignar", enviamos null
-      const tableId = selectedValue === '' ? null : parseInt(selectedValue);
+      const newTableId = selectedValue === '' ? null : parseInt(selectedValue);
+      
+      // Buscar el nombre de la nueva mesa
+      const newTableName = newTableId 
+        ? availableTables.find(t => t.id === newTableId)?.tableName || null
+        : null;
 
       // Llamar a la API para asignar la mesa
-      await tablesApi.assignGuestToTable(guest.id, tableId);
+      await tablesApi.assignGuestToTable(guest.id, newTableId);
 
-      // Notificar al componente padre para que refresque los datos
-      onAssignmentChange();
+      // Actualizar el invitado localmente (optimistic update)
+      guest.tableId = newTableId;
+      guest.tableName = newTableName;
+
+      // Notificar al componente padre con los datos del cambio
+      onAssignmentChange(guest.id, oldTableId!, newTableId, newTableName);
       
     } catch (err) {
       console.error('Error assigning table:', err);
       setError(err instanceof Error ? err.message : 'Error al asignar mesa');
       
       // Revertir el select a su valor anterior
-      event.target.value = guest.tableId?.toString() || '';
+      event.target.value = oldTableId?.toString() || '';
+      
+      // Revertir el estado local
+      guest.tableId = oldTableId;
+      guest.tableName = oldTableName;
     } finally {
       setIsAssigning(false);
     }
