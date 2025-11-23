@@ -640,12 +640,6 @@ export default function InvitationPage() {
                   </p>
                   <p style={{ color: "#586e26" }}>
                     <span className="font-medium" style={{ color: "#4c0013" }}>
-                      • Negro total
-                    </span>{" "}
-                    - muy formal para la ocasión
-                  </p>
-                  <p style={{ color: "#586e26" }}>
-                    <span className="font-medium" style={{ color: "#4c0013" }}>
                       • Rojo intenso
                     </span>{" "}
                     - muy llamativo

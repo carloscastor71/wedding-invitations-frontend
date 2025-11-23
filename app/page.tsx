@@ -241,9 +241,9 @@ Carlos & Karen`;
       // MENSAJE ESPECIAL PARA RECORDATORIO
       const message = `¡Hola de nuevo ${family.contactPerson}! 👋
 
-Este es un recordatorio con el enlace corregido para confirmar tu asistencia a nuestra boda.
+Este es un recordatorio con la fecha limite para confirmar tu asistencia a nuestra boda.
 
-Hemos observado que algunos enlaces no llegaban correctamente, por lo que enviamos este nuevo enlace:
+Por lo que enviamos este nuevo enlace debido a que el anterior ya expiró:
 
 ${shortUrl}
 
