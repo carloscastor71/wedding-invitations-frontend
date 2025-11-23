@@ -104,15 +104,15 @@ Carlos y Karen nos casamos y queremos celebrarlo contigo! 💍
 *Detalles del evento:*
 📅 20 de Diciembre de 2025
 ⛪ Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-💒 Ceremonia Civil: 8:00 PM - Salon MONET  
-🎉 Recepción: 8:30 PM - Salon MONET
+💒 Ceremonia Civil: 8:00 PM - Salon MONARCA  
+🎉 Recepción: 8:30 PM - Salon MONARCA
 
 Confirma tu asistencia aquí:
 
 ${shortUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *10 de Noviembre de 2025*
+Fecha límite: *05 de Diciembre de 2025*
 
 *Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
@@ -179,14 +179,14 @@ Carlos y Karen nos casamos y queremos celebrarlo contigo!
 *Detalles del evento:*
 📅 20 de Diciembre de 2025
 ⛪ Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-💒 Ceremonia Civil: 8:00 PM - Salon MONET  
-🎉 Recepción: 8:30 PM - Salon MONET
+💒 Ceremonia Civil: 8:00 PM - Salon MONARCA  
+🎉 Recepción: 8:30 PM - Salon MONARCA
 
 Por favor confirma tu asistencia:
 ${originalUrl}
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *10 de Noviembre de 2025*
+Fecha límite: *05 de Diciembre de 2025*
 
 *Si necesitas hacer algún cambio, contáctanos por WhatsApp.*
 
@@ -250,11 +250,11 @@ ${shortUrl}
 *Detalles del evento:*
 📅 20 de Diciembre de 2025
 ⛪ Ceremonia Religiosa: 5:30 PM - Parroquia De San Agustín
-💒 Ceremonia Civil: 8:00 PM - Salon MONET  
-🎉 Recepción: 8:30 PM - Salon MONET
+💒 Ceremonia Civil: 8:00 PM - Salon MONARCA  
+🎉 Recepción: 8:30 PM - Salon MONARCA
 
 Espacios disponibles: *${family.maxGuests} personas*
-Fecha límite: *10 de Noviembre de 2025*
+Fecha límite: *05 de Diciembre de 2025*
 
 Si tienes algún problema con este enlace o necesitas ayuda, por favor contáctanos directamente por WhatsApp.
 

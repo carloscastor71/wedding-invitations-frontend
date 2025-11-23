@@ -55,14 +55,14 @@ export default function InvitationPage() {
     {
       name: "Ceremonia Civil",
       time: "8:00 PM",
-      venue: "Salon MONET",
+      venue: "Salon MONARCA",
       address: "Cll Lisboa 101 Granjas de San Isidro, 27100 Torreón, Coahuila",
       icon: "💍",
     },
     {
       name: "Recepción",
       time: "8:30 PM",
-      venue: "Salon MONET",
+      venue: "Salon MONARCA",
       address: "Cll Lisboa 101 Granjas de San Isidro, 27100 Torreón, Coahuila",
       icon: "🎉",
     },
@@ -804,7 +804,7 @@ export default function InvitationPage() {
                 className="text-sm mb-8 opacity-80"
                 style={{ color: "#4c0013" }}
               >
-                Fecha límite: 10 de Noviembre 2025
+                Fecha límite: 05 de Diciembre 2025
               </p>
 
               <div className="flex gap-4 justify-center flex-wrap">
