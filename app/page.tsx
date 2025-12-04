@@ -293,6 +293,30 @@ Carlos & Karen ❤️`;
       alert("⚠️ Error al enviar recordatorio");
     }
   };
+
+  const handleGeneratePasses = async (family: Family) => {
+    try {
+      console.log(`📄 Generando pases para ${family.familyName}...`);
+
+      const result = await familiesApi.generatePasses(family.id);
+
+      console.log(`✅ ${result.passesCount} pase(s) generados`);
+
+      // Abrir WhatsApp automáticamente
+      window.open(result.whatsappUrl, "_blank");
+
+      // Mostrar alerta de éxito
+      alert(
+        `✅ ${result.passesCount} pase(s) generados exitosamente para ${result.familyName}`
+      );
+    } catch (err) {
+      console.error("❌ Error al generar pases:", err);
+      alert(
+        "Error al generar pases. Verifica que la familia tenga mesas asignadas."
+      );
+    }
+  };
+
   const markAsSent = async (familyId: number) => {
     try {
       // Actualizar en base de datos
@@ -610,7 +634,15 @@ Carlos & Karen ❤️`;
                               🔔 Recordatorio
                             </button>
                           )}
-
+                          {family.status === "confirmed" && (
+                            <button
+                              onClick={() => handleGeneratePasses(family)}
+                              className="bg-purple-500 text-white px-3 py-1 rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium"
+                              title="Generar pases en PDF y enviar por WhatsApp"
+                            >
+                              📄 Generar Pase
+                            </button>
+                          )}
                           <button
                             onClick={() =>
                               deleteFamily(family.id, family.familyName)

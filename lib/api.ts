@@ -134,6 +134,23 @@ export interface AssignTableRequest {
   tableId: number | null;
 }
 
+// === NUEVA INTERFACE PARA GENERACIÓN DE PASES ===
+export interface GeneratePassesResponse {
+  success: boolean;
+  familyName: string;
+  passesCount: number;
+  passes: {
+    tableNumber?: number;
+    tableName?: string;
+    guestCount: number;
+    fileName: string;
+    url: string;
+    sizeKB: number;
+  }[];
+  whatsappMessage: string;
+  whatsappUrl: string;
+}
+
 // === APIS EXISTENTES ===
 
 export const familiesApi = {
@@ -212,6 +229,19 @@ export const familiesApi = {
 
     if (!response.ok) {
       throw new Error("Error al obtener invitados");
+    }
+
+    return response.json();
+  },
+
+  generatePasses: async (familyId: number): Promise<GeneratePassesResponse> => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/families/${familyId}/generate-passes`
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al generar pases");
     }
 
     return response.json();
