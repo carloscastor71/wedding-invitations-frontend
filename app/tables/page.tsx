@@ -5,12 +5,14 @@ import Link from 'next/link';
 import TableCard from '@/app/components/tables/TableCard';
 import GuestsList from '@/app/components/tables/GuestsList';
 import { tablesApi, TableSummary, TableStats } from '@/lib/api';
+import TableGuestsModal from "@/app/components/tables/TableGuestsModal";
 
 export default function TablesPage() {
   const [tables, setTables] = useState<TableSummary[]>([]);
   const [stats, setStats] = useState<TableStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTable, setSelectedTable] = useState<{ id: number; name: string } | null>(null);
 
   // Fetch inicial de datos
   useEffect(() => {
@@ -36,6 +38,14 @@ export default function TablesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openGuestsModal = (tableId: number, tableName: string) => {
+    setSelectedTable({ id: tableId, name: tableName });
+  };
+
+  const closeGuestsModal = () => {
+    setSelectedTable(null);
   };
 
   // Actualizar solo las mesas afectadas sin recargar toda la página
@@ -218,6 +228,7 @@ export default function TablesPage() {
               <TableCard 
                 key={table.id} 
                 table={table}
+                onViewGuests={openGuestsModal}
               />
             ))}
           </div>
@@ -236,6 +247,16 @@ export default function TablesPage() {
         </section>
 
       </main>
+
+      {/* MODAL DE INVITADOS */}
+      {selectedTable && (
+        <TableGuestsModal
+          tableId={selectedTable.id}
+          tableName={selectedTable.name}
+          onClose={closeGuestsModal}
+        />
+      )}
+
     </div>
   );
 }

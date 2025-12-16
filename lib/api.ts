@@ -150,6 +150,23 @@ export interface GeneratePassesResponse {
   whatsappMessage: string;
   whatsappUrl: string;
 }
+// Interface para invitado de mesa (respuesta de getTableGuests)
+export interface TableGuest {
+  id: number;
+  name: string;
+  isChild: boolean;
+  familyName: string;
+  notes?: string;
+}
+
+// Interface para respuesta completa de invitados de mesa
+export interface TableGuestsResponse {
+  id: number;
+  tableName: string;
+  currentOccupancy: number;
+  maxCapacity: number;
+  guests: TableGuest[];
+}
 
 // === APIS EXISTENTES ===
 
@@ -326,15 +343,15 @@ export const tablesApi = {
   },
 
   // Obtener invitados de una mesa específica
-  getTableGuests: async (tableId: number) => {
-    const response = await fetch(`${API_BASE_URL}/api/tables/${tableId}/guests`);
-    
-    if (!response.ok) {
-      throw new Error("Error al obtener invitados de la mesa");
-    }
-    
-    return response.json();
-  },
+getTableGuests: async (tableId: number): Promise<TableGuestsResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/tables/${tableId}/guests`);
+  
+  if (!response.ok) {
+    throw new Error("Error al obtener invitados de la mesa");
+  }
+  
+  return response.json();
+},
 
   // Asignar o cambiar mesa de un invitado
   assignGuestToTable: async (

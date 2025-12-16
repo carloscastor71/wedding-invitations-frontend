@@ -127,7 +127,7 @@ export default function GuestRow({ guest, availableTables, onAssignmentChange }:
               {/* Opción actual si ya está asignado y la mesa está llena */}
               {guest.tableId && !availableTables.find(t => t.id === guest.tableId) && (
                 <option value={guest.tableId}>
-                  {guest.tableName} (actual)
+                  {guest.tableName} (Llena)
                 </option>
               )}
 
