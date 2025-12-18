@@ -8,7 +8,7 @@ export interface Family {
   contactPerson: string;
   email?: string;
   phone: string;
-    country?: string; // ✅ NUEVO
+  country?: string;
   maxGuests: number;
   invitationCode: string;
   invitationSent: boolean;
@@ -35,7 +35,7 @@ export interface CreateFamilyRequest {
 
 export interface InvitationData {
   familyName: string;  
-  correctedFamilyName?: string; // ✅ NUEVO
+  correctedFamilyName?: string;
   contactPerson: string;
   maxGuests: number;
   confirmedGuests: number;
@@ -64,12 +64,11 @@ export interface Guest {
 export interface CompleteFormRequest {
   guests: Guest[];
   familyMessage?: string;
-    correctedFamilyName?: string; // ✅ NUEVO
+  correctedFamilyName?: string;
 }
 
-// === NUEVAS INTERFACES PARA SISTEMA DE MESAS ===
+// === INTERFACES PARA SISTEMA DE MESAS ===
 
-// Interface básica de mesa
 export interface Table {
   id: number;
   tableNumber: number;
@@ -78,7 +77,6 @@ export interface Table {
   currentOccupancy: number;
 }
 
-// Interface para el resumen de mesa (incluye campos calculados)
 export interface TableSummary extends Table {
   availableSeats: number;
   percentageOccupied: number;
@@ -86,7 +84,6 @@ export interface TableSummary extends Table {
   isHonorTable: boolean;
 }
 
-// Interface para mesa disponible en dropdown
 export interface AvailableTable {
   id: number;
   tableName: string;
@@ -94,7 +91,6 @@ export interface AvailableTable {
   display: string;
 }
 
-// Interface para invitado con asignación de mesa
 export interface GuestAssignment {
   id: number;
   name: string;
@@ -107,7 +103,6 @@ export interface GuestAssignment {
   country: string;
 }
 
-// Interface para respuesta paginada de invitados
 export interface GuestsAssignmentResponse {
   data: GuestAssignment[];
   pagination: {
@@ -118,7 +113,6 @@ export interface GuestsAssignmentResponse {
   };
 }
 
-// Interface para estadísticas de mesas
 export interface TableStats {
   totalGuests: number;
   assignedGuests: number;
@@ -129,12 +123,27 @@ export interface TableStats {
   percentageAssigned: number;
 }
 
-// Interface para solicitud de asignación
 export interface AssignTableRequest {
   tableId: number | null;
 }
 
-// === NUEVA INTERFACE PARA GENERACIÓN DE PASES ===
+export interface TableGuest {
+  id: number;
+  name: string;
+  isChild: boolean;
+  familyName: string;
+  notes?: string;
+}
+
+export interface TableGuestsResponse {
+  id: number;
+  tableName: string;
+  currentOccupancy: number;
+  maxCapacity: number;
+  guests: TableGuest[];
+}
+
+// === INTERFACES PARA GENERACIÓN DE PASES ===
 export interface GeneratePassesResponse {
   success: boolean;
   familyName: string;
@@ -150,25 +159,56 @@ export interface GeneratePassesResponse {
   whatsappMessage: string;
   whatsappUrl: string;
 }
-// Interface para invitado de mesa (respuesta de getTableGuests)
-export interface TableGuest {
-  id: number;
+
+// === INTERFACES PARA GUEST MANAGEMENT ===
+
+export interface GuestData {
   name: string;
   isChild: boolean;
-  familyName: string;
+  dietaryRestrictions?: string;
   notes?: string;
 }
 
-// Interface para respuesta completa de invitados de mesa
-export interface TableGuestsResponse {
-  id: number;
-  tableName: string;
-  currentOccupancy: number;
-  maxCapacity: number;
-  guests: TableGuest[];
+export interface NewFamilyData {
+  familyName: string;
+  contactPerson: string;
+  phone: string;
+  email?: string;
+  country?: string;
 }
 
-// === APIS EXISTENTES ===
+export interface AddGuestRequest {
+  familyId?: number;
+  newFamily?: NewFamilyData;
+  guest: GuestData;
+}
+
+export interface UpdateGuestRequest {
+  name: string;
+  isChild: boolean;
+  dietaryRestrictions?: string;
+  notes?: string;
+}
+
+export interface FamilyDropdownItem {
+  id: number;
+  displayName: string;
+  currentGuests: number;
+  maxGuests: number;
+  status: string;
+}
+
+export interface GuestSearchResult {
+  id: number;
+  name: string;
+  isChild: boolean;
+  dietaryRestrictions?: string;
+  notes?: string;
+  familyId: number;
+  familyName: string;
+}
+
+// === API PARA FAMILIAS ===
 
 export const familiesApi = {
   getAll: async (): Promise<Family[]> => {
@@ -225,7 +265,6 @@ export const familiesApi = {
     return response.blob();
   },
 
-  // === NUEVO ENDPOINT PARA ASIGNACIÓN DE MESAS ===
   getGuestsForAssignment: async (
     page: number = 1,
     pageSize: number = 20,
@@ -264,6 +303,8 @@ export const familiesApi = {
     return response.json();
   },
 };
+
+// === API PARA INVITACIONES ===
 
 export const invitationApi = {
   getInvitation: async (code: string): Promise<InvitationData> => {
@@ -306,10 +347,9 @@ export const invitationApi = {
   },
 };
 
-// === NUEVA API PARA SISTEMA DE MESAS ===
+// === API PARA SISTEMA DE MESAS ===
 
 export const tablesApi = {
-  // Obtener resumen de todas las mesas
   getSummary: async (): Promise<TableSummary[]> => {
     const response = await fetch(`${API_BASE_URL}/api/tables/summary`);
     
@@ -320,7 +360,6 @@ export const tablesApi = {
     return response.json();
   },
 
-  // Obtener solo mesas con espacio disponible
   getAvailable: async (): Promise<AvailableTable[]> => {
     const response = await fetch(`${API_BASE_URL}/api/tables/available`);
     
@@ -331,7 +370,6 @@ export const tablesApi = {
     return response.json();
   },
 
-  // Obtener estadísticas generales
   getStats: async (): Promise<TableStats> => {
     const response = await fetch(`${API_BASE_URL}/api/tables/stats`);
     
@@ -342,18 +380,16 @@ export const tablesApi = {
     return response.json();
   },
 
-  // Obtener invitados de una mesa específica
-getTableGuests: async (tableId: number): Promise<TableGuestsResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/tables/${tableId}/guests`);
-  
-  if (!response.ok) {
-    throw new Error("Error al obtener invitados de la mesa");
-  }
-  
-  return response.json();
-},
+  getTableGuests: async (tableId: number): Promise<TableGuestsResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/tables/${tableId}/guests`);
+    
+    if (!response.ok) {
+      throw new Error("Error al obtener invitados de la mesa");
+    }
+    
+    return response.json();
+  },
 
-  // Asignar o cambiar mesa de un invitado
   assignGuestToTable: async (
     guestId: number, 
     tableId: number | null
@@ -370,6 +406,100 @@ getTableGuests: async (tableId: number): Promise<TableGuestsResponse> => {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Error al asignar mesa");
+    }
+
+    return response.json();
+  },
+};
+
+// === API PARA GUEST MANAGEMENT ===
+
+export const guestManagementApi = {
+  addGuest: async (request: AddGuestRequest) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/guest-management/guests`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al agregar invitado");
+    }
+
+    return response.json();
+  },
+
+  updateGuest: async (guestId: number, request: UpdateGuestRequest) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/guest-management/guests/${guestId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al actualizar invitado");
+    }
+
+    return response.json();
+  },
+
+  getFamiliesForDropdown: async (): Promise<FamilyDropdownItem[]> => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/guest-management/families/dropdown`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al obtener familias");
+    }
+
+    return response.json();
+  },
+
+  searchGuests: async (
+    familyId?: number,
+    search?: string
+  ): Promise<GuestSearchResult[]> => {
+    const params = new URLSearchParams();
+    
+    if (familyId) {
+      params.append("familyId", familyId.toString());
+    }
+    
+    if (search) {
+      params.append("search", search);
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/guest-management/guests/search?${params}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Error al buscar invitados");
+    }
+
+    return response.json();
+  },
+
+  deleteGuest: async (guestId: number) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/guest-management/guests/${guestId}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al eliminar invitado");
     }
 
     return response.json();
